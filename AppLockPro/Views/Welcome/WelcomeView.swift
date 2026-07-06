@@ -1,9 +1,13 @@
 import SwiftUI
+import AVFoundation
+import ApplicationServices
 
 /// The welcome / onboarding screen shown on first launch.
 struct WelcomeView: View {
     @EnvironmentObject var appState: AppState
     @State private var currentStep: OnboardingStep = .welcome
+    @State private var cameraGranted = false
+    @State private var accessibilityGranted = false
 
     enum OnboardingStep: Int, CaseIterable {
         case welcome
@@ -82,6 +86,7 @@ struct WelcomeView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
+                    .disabled(currentStep == .permissions && (!cameraGranted || !accessibilityGranted))
                 }
             }
             .padding(30)
@@ -132,15 +137,37 @@ struct WelcomeView: View {
                 .frame(maxWidth: 500)
 
             VStack(alignment: .leading, spacing: 16) {
-                permissionRow(icon: "camera.fill", title: "Camera Access",
-                              subtitle: "Required for facial recognition",
-                              granted: false)
-                permissionRow(icon: "universalaccess", title: "Accessibility",
-                              subtitle: "Required to monitor app launches",
-                              granted: false)
+                permissionRow(
+                    icon: "camera.fill",
+                    title: "Camera Access",
+                    subtitle: "Required for facial recognition",
+                    granted: cameraGranted
+                ) {
+                    requestCamera()
+                }
+                
+                permissionRow(
+                    icon: "universalaccess",
+                    title: "Accessibility",
+                    subtitle: "Required to monitor app launches",
+                    granted: accessibilityGranted
+                ) {
+                    requestAccessibility()
+                }
             }
             .padding(.horizontal, 40)
             .padding(.top, 10)
+            
+            if !accessibilityGranted {
+                Text("Clicking 'Grant Access' for Accessibility will open System Settings. Check the box for FaceLock Pro, then click the button again to verify.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            }
+        }
+        .onAppear {
+            checkPermissions()
         }
     }
 
@@ -204,7 +231,7 @@ struct WelcomeView: View {
         }
     }
 
-    private func permissionRow(icon: String, title: String, subtitle: String, granted: Bool) -> some View {
+    private func permissionRow(icon: String, title: String, subtitle: String, granted: Bool, action: @escaping () -> Void) -> some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
                 .font(.title2)
@@ -218,12 +245,38 @@ struct WelcomeView: View {
 
             Spacer()
 
-            Image(systemName: granted ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(granted ? .green : .secondary)
-                .font(.title2)
+            if granted {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                    .font(.title2)
+            } else {
+                Button("Grant Access") {
+                    action()
+                }
+                .buttonStyle(.bordered)
+            }
         }
         .padding()
         .background(.background.secondary, in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    private func checkPermissions() {
+        cameraGranted = AVCaptureDevice.authorizationStatus(for: .video) == .authorized
+        accessibilityGranted = AXIsProcessTrusted()
+    }
+    
+    private func requestCamera() {
+        AVCaptureDevice.requestAccess(for: .video) { granted in
+            DispatchQueue.main.async {
+                self.cameraGranted = granted
+            }
+        }
+    }
+    
+    private func requestAccessibility() {
+        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
+        let accessEnabled = AXIsProcessTrustedWithOptions(options)
+        self.accessibilityGranted = accessEnabled
     }
 
     private func enrollmentStep(number: Int, text: String) -> some View {
