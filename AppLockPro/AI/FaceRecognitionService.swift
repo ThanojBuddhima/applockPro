@@ -1,34 +1,73 @@
 import Foundation
 import CoreVideo
 import Accelerate
+import Vision
+import CoreML
 
-/// Simulates extracting 512-dimensional face embeddings and provides cosine similarity math.
+/// Uses the real ArcFace (CoreML) model to extract 512-dimensional face embeddings and provides cosine similarity math.
 class FaceRecognitionService {
     static let shared = FaceRecognitionService()
     
     // Configurable threshold for matching faces (ArcFace usually uses around 0.5 - 0.6)
-    let similarityThreshold: Float = 0.60
+    let similarityThreshold: Float = 0.55
     
-    private init() {}
+    private var visionModel: VNCoreMLModel?
     
-    /// Simulates generating a 512-d embedding from a CVPixelBuffer.
-    /// In a real app, this would preprocess the buffer and run it through a CoreML model.
+    private init() {
+        // Load the real ArcFace CoreML model
+        do {
+            let config = MLModelConfiguration()
+            let arcFace = try ArcFaceModel(configuration: config)
+            self.visionModel = try VNCoreMLModel(for: arcFace.model)
+        } catch {
+            print("Failed to load ArcFace model: \(error)")
+        }
+    }
+    
+    /// Generates a 512-d embedding from a CVPixelBuffer using ArcFace.
     func generateEmbedding(from pixelBuffer: CVPixelBuffer, completion: @escaping ([Float]?) -> Void) {
-        // Simulate a heavy ML extraction workload (about 150ms on Apple Silicon)
-        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 0.15) {
-            // For the sake of this prototype without an ArcFace model, 
-            // we will generate a consistent "dummy" embedding based on the current timestamp 
-            // or just a hardcoded array if we want it to always match.
-            // Since we want the user to be able to lock and unlock, we return a standard "user" embedding.
-            var dummyEmbedding = [Float](repeating: 0, count: 512)
-            dummyEmbedding[0] = 0.9 // Give it some feature
-            dummyEmbedding[511] = 0.1
+        guard let visionModel = visionModel else {
+            completion(nil)
+            return
+        }
+        
+        let request = VNCoreMLRequest(model: visionModel) { request, error in
+            guard error == nil,
+                  let results = request.results as? [VNCoreMLFeatureValueObservation],
+                  let firstResult = results.first,
+                  let multiArray = firstResult.featureValue.multiArrayValue else {
+                DispatchQueue.main.async { completion(nil) }
+                return
+            }
             
-            // Normalize it just like a real embedding would be
-            let normalized = self.normalize(embedding: dummyEmbedding)
+            // Convert MLMultiArray to [Float]
+            var embedding = [Float](repeating: 0, count: 512)
+            let count = min(multiArray.count, 512)
+            
+            for i in 0..<count {
+                embedding[i] = multiArray[i].floatValue
+            }
+            
+            // L2 Normalize
+            let normalized = self.normalize(embedding: embedding)
             
             DispatchQueue.main.async {
                 completion(normalized)
+            }
+        }
+        
+        // ArcFace expects the face to be cropped/scaled. Vision handles the scaling automatically.
+        // We use .scaleFill or .centerCrop based on the model needs.
+        request.imageCropAndScaleOption = .scaleFill
+        
+        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                try handler.perform([request])
+            } catch {
+                print("Failed to perform CoreML request: \(error)")
+                DispatchQueue.main.async { completion(nil) }
             }
         }
     }
@@ -42,8 +81,6 @@ class FaceRecognitionService {
         // Fast SIMD dot product
         vDSP_dotpr(embeddingA, 1, embeddingB, 1, &dotProduct, vDSP_Length(embeddingA.count))
         
-        // Since the embeddings should already be L2-normalized, the dot product IS the cosine similarity.
-        // However, we can calculate magnitudes just to be safe.
         var magA: Float = 0.0
         var magB: Float = 0.0
         
