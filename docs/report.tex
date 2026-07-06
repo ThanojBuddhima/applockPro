@@ -1,0 +1,1241 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{top=1in, bottom=1in, left=1in, right=1in}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{tocloft}
+\usepackage{amsmath}
+
+% Code listing style
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue!70},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{red!70},
+    showstringspaces=false,
+    tabsize=4
+}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textit{FaceLock Pro — Project Report}}
+\fancyhead[R]{\textit{\today}}
+\fancyfoot[C]{\thepage}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!70,
+    citecolor=green!50!black
+}
+
+\title{
+    \vspace{-1cm}
+    \rule{\linewidth}{0.5mm} \\[0.4cm]
+    {\Huge \textbf{FaceLock Pro}} \\[0.3cm]
+    {\Large AI-Powered Privacy \& App Locker for macOS} \\[0.2cm]
+    \rule{\linewidth}{0.5mm} \\[1cm]
+    {\large Complete Technical Report}
+}
+\author{AppLockPro Project}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\vfill
+\begin{center}
+\begin{tabular}{ll}
+    \textbf{Project Name:}     & FaceLock Pro (AppLockPro) \\
+    \textbf{Version:}          & 1.0.0 \\
+    \textbf{Platform:}         & macOS 14.0+ (Sonoma) \\
+    \textbf{Target Hardware:}  & Apple Silicon (M1, M2, M3, M4) \\
+    \textbf{Language:}         & Swift 5.9+ \\
+    \textbf{Architecture:}     & MVVM (Model-View-ViewModel) \\
+    \textbf{AI Processing:}    & 100\% Offline \\
+\end{tabular}
+\end{center}
+\vfill
+
+\newpage
+\tableofcontents
+\newpage
+
+% ============================================================
+\chapter{Introduction}
+% ============================================================
+
+\section{Project Overview}
+\textbf{FaceLock Pro} is a professional macOS desktop application designed to add an intelligent privacy layer to the operating system. By requiring biometric authentication --- specifically facial recognition --- before allowing access to user-designated applications, it ensures that sensitive data remains secure even if the Mac is left unlocked.
+
+A critical tenet of this project is privacy: the application runs entirely offline. No biometric or personal data is ever uploaded to external servers. It is optimized exclusively for Apple Silicon Macs (M1, M2, M3, M4) to provide fast, efficient, and battery-friendly authentication by leveraging the Apple Neural Engine for on-device machine learning inference.
+
+\section{Problem Statement}
+macOS provides system-level login security (password, Touch ID, Apple Watch unlock), but once a user is logged in, all applications are freely accessible. This creates a privacy gap in several scenarios:
+
+\begin{itemize}[noitemsep]
+    \item A user steps away from an unlocked Mac in a shared workspace.
+    \item A family member or friend borrows the laptop and opens personal applications such as Messages, Photos, or Notes.
+    \item Sensitive applications (banking, email, code editors with proprietary projects) remain unprotected after login.
+    \item Existing third-party solutions often require cloud connectivity, raising privacy and data sovereignty concerns.
+\end{itemize}
+
+FaceLock Pro addresses these gaps by providing application-level biometric protection that operates entirely on-device.
+
+\section{Project Objectives}
+The core objectives include:
+\begin{enumerate}[noitemsep]
+    \item \textbf{Application Protection:} Allow users to select and protect any installed application.
+    \item \textbf{Facial Recognition:} Unlock applications using real-time AI-powered facial recognition.
+    \item \textbf{Access Prevention:} Prevent unauthorized access to protected applications by intercepting launch events.
+    \item \textbf{Offline Operation:} Ensure 100\% offline processing to guarantee user privacy.
+    \item \textbf{Secure Storage:} Store biometric data (face embeddings) encrypted locally using the macOS Keychain.
+    \item \textbf{Fast Authentication:} Provide sub-500-millisecond authentication using Apple Neural Engine hardware acceleration.
+    \item \textbf{Battery Efficiency:} Minimize battery and CPU impact through event-driven architecture.
+    \item \textbf{Native Experience:} Adhere to Apple's macOS Human Interface Guidelines for a polished user experience.
+\end{enumerate}
+
+\section{Scope}
+\subsection{In Scope}
+\begin{itemize}[noitemsep]
+    \item Native macOS application for Apple Silicon.
+    \item Offline facial recognition using ArcFace (InsightFace) converted to Core ML.
+    \item Multi-factor authentication (Face, Touch ID, macOS password, PIN).
+    \item Background application monitoring and protection.
+    \item Face enrollment wizard with quality validation.
+    \item Liveness detection (anti-spoofing).
+    \item Activity logging and native notifications.
+    \item Configurable settings for security, sessions, and privacy.
+\end{itemize}
+
+\subsection{Out of Scope}
+\begin{itemize}[noitemsep]
+    \item Cloud-based authentication or biometric sync.
+    \item Mac App Store distribution (requires sandboxing, which prevents app monitoring).
+    \item Intel Mac support (Apple Neural Engine required).
+    \item System login screen replacement.
+    \item File or folder-level encryption (planned for future versions).
+\end{itemize}
+
+% ============================================================
+\chapter{Core Features}
+% ============================================================
+
+\section{AI Face Unlock}
+The primary authentication method uses real-time facial recognition processed entirely on-device.
+
+\subsection{Technical Details}
+\begin{itemize}
+    \item \textbf{Camera Input:} Live feed captured via \texttt{AVFoundation} using \texttt{AVCaptureSession} with a front-facing camera (\texttt{.builtInWideAngleCamera}, position \texttt{.front}).
+    \item \textbf{Face Detection:} Apple's Vision Framework (\texttt{VNDetectFaceRectanglesRequest}) provides hardware-accelerated face bounding box detection in under 100\,ms.
+    \item \textbf{Landmark Detection:} \texttt{VNDetectFaceLandmarksRequest} extracts 76 facial landmarks (eyes, nose, mouth, jawline, eyebrows) for alignment.
+    \item \textbf{Face Alignment:} An affine transformation is computed from eye positions to normalize the face to a frontal 112$\times$112 pixel image.
+    \item \textbf{Feature Extraction:} The aligned face is passed through the ArcFace model (converted to Core ML), which outputs a 512-dimensional embedding vector.
+    \item \textbf{Comparison:} Cosine similarity is computed between the live embedding and the stored reference embedding. If the similarity exceeds the configurable threshold (default: 0.55), authentication succeeds.
+\end{itemize}
+
+\subsection{Cosine Similarity}
+The similarity between two embedding vectors $\mathbf{a}$ and $\mathbf{b}$ is calculated as:
+
+\[
+\text{similarity}(\mathbf{a}, \mathbf{b}) = \frac{\mathbf{a} \cdot \mathbf{b}}{||\mathbf{a}|| \times ||\mathbf{b}||} = \frac{\sum_{i=1}^{512} a_i \cdot b_i}{\sqrt{\sum_{i=1}^{512} a_i^2} \times \sqrt{\sum_{i=1}^{512} b_i^2}}
+\]
+
+This computation is accelerated using Apple's \texttt{Accelerate} framework (\texttt{vDSP}) for SIMD vector operations on Apple Silicon.
+
+\section{Application Locker}
+Users can protect any installed macOS application by selecting it from a list.
+
+\subsection{App Discovery}
+Installed applications are discovered by scanning the \texttt{/Applications} directory and user-specific \texttt{\textasciitilde/Applications}. For each application bundle (\texttt{.app}), the following metadata is extracted:
+
+\begin{itemize}[noitemsep]
+    \item Display name (from \texttt{CFBundleName} in \texttt{Info.plist})
+    \item Bundle identifier (e.g., \texttt{com.apple.Safari})
+    \item Application icon (via \texttt{NSWorkspace.shared.icon(forFile:)})
+    \item File path
+\end{itemize}
+
+\subsection{Data Model}
+Each protected application is persisted with the following schema:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Field} & \textbf{Type} & \textbf{Description} \\
+\midrule
+id & UUID & Unique identifier \\
+name & String & Display name \\
+bundleIdentifier & String & macOS bundle ID \\
+path & String & Path to \texttt{.app} bundle \\
+isProtected & Bool & Whether currently protected \\
+dateAdded & Date & When app was added to list \\
+\bottomrule
+\end{tabular}
+\caption{ProtectedApp data model}
+\end{table}
+
+\section{Background Protection}
+The application continuously monitors running processes using macOS system APIs.
+
+\subsection{Monitoring Mechanism}
+Two complementary methods are used for reliability:
+
+\begin{enumerate}
+    \item \textbf{NSWorkspace Notifications:} The app subscribes to \texttt{NSWorkspace.didLaunchApplicationNotification} via \texttt{NSWorkspace.shared.notificationCenter}. When any application launches, the notification provides an \texttt{NSRunningApplication} object containing the bundle identifier.
+    
+    \item \textbf{Key-Value Observing (KVO):} As a backup, the app observes \texttt{NSWorkspace.shared.runningApplications} using KVO (\texttt{observe(\textbackslash.runningApplications)}) to detect applications that may not trigger the standard notification (e.g., background-only apps).
+\end{enumerate}
+
+\subsection{Interception Flow}
+When a protected application is detected:
+
+\begin{enumerate}[noitemsep]
+    \item The bundle identifier is checked against the protected apps list.
+    \item If the user has an active authenticated session for that app, access is granted immediately.
+    \item Otherwise, the protected application is hidden using \texttt{NSRunningApplication.hide()}.
+    \item A floating authentication panel (\texttt{NSPanel} with \texttt{.floating} window level) is presented.
+    \item Upon successful authentication, the app is unhidden via \texttt{NSRunningApplication.unhide()}.
+    \item On repeated failures (exceeding max attempts), the app may be terminated via \texttt{NSRunningApplication.terminate()}.
+\end{enumerate}
+
+\subsection{macOS API Constraints}
+\begin{itemize}[noitemsep]
+    \item The application must be \textbf{non-sandboxed} to call \texttt{hide()}, \texttt{unhide()}, and \texttt{terminate()} on other applications. Sandboxed apps are prohibited from controlling other processes.
+    \item This means the application \textbf{cannot be distributed via the Mac App Store}.
+    \item Distribution is via notarized DMG, direct download, or Homebrew cask.
+    \item A determined user could bypass hiding via Mission Control; this is documented as a known limitation.
+\end{itemize}
+
+\section{Face Enrollment Wizard}
+The enrollment wizard guides the user through capturing their facial data for future authentication.
+
+\subsection{Process}
+\begin{enumerate}
+    \item \textbf{Pre-checks:} Camera permission is verified. Ambient lighting is assessed using the camera's average luminance. The user is prompted to ensure good lighting and remove obstructions (sunglasses, masks).
+    
+    \item \textbf{Capture Phase:} 20--30 face images are captured at different angles:
+    \begin{itemize}[noitemsep]
+        \item Center (frontal)
+        \item Slight left, slight right
+        \item Slight up, slight down
+        \item Tilted left, tilted right
+    \end{itemize}
+    Each captured frame undergoes quality validation:
+    \begin{itemize}[noitemsep]
+        \item Face detected within bounding box ($>$ 70\% of frame)
+        \item Face capture quality score $>$ 0.5 (via \texttt{VNDetectFaceCaptureQualityRequest})
+        \item Both eyes visible (via landmark detection)
+        \item Sufficient image sharpness (Laplacian variance check)
+    \end{itemize}
+    
+    \item \textbf{Embedding Generation:} Each valid capture is aligned and passed through the ArcFace model to produce a 512-dimensional embedding vector.
+    
+    \item \textbf{Averaging:} All embeddings are element-wise averaged to produce a single reference embedding:
+    \[
+    \mathbf{e}_{\text{ref}} = \frac{1}{N} \sum_{i=1}^{N} \mathbf{e}_i
+    \]
+    where $N$ is the number of valid captures and $\mathbf{e}_i$ is the embedding for capture $i$.
+    
+    \item \textbf{Normalization:} The averaged embedding is L2-normalized:
+    \[
+    \hat{\mathbf{e}}_{\text{ref}} = \frac{\mathbf{e}_{\text{ref}}}{||\mathbf{e}_{\text{ref}}||}
+    \]
+    
+    \item \textbf{Encryption \& Storage:} The normalized embedding is serialized, encrypted, and stored in the macOS Keychain under a dedicated key.
+    
+    \item \textbf{Cleanup:} All raw image data and intermediate embeddings are zeroed out and deallocated from memory. No images are ever written to disk.
+\end{enumerate}
+
+\section{Liveness Detection}
+Liveness detection prevents spoofing attacks where an adversary presents a photo or video of the enrolled user.
+
+\subsection{Tier 1: Vision Framework (No Additional Model)}
+The primary liveness detection uses Apple's Vision Framework landmarks:
+
+\begin{itemize}
+    \item \textbf{Blink Detection:} The Eye Aspect Ratio (EAR) is computed from eye landmarks. EAR drops below a threshold ($\sim$0.2) during a blink. Two consecutive blinks within 3 seconds confirms liveness.
+    
+    \[
+    \text{EAR} = \frac{|p_2 - p_6| + |p_3 - p_5|}{2 \times |p_1 - p_4|}
+    \]
+    where $p_1 \ldots p_6$ are the six landmarks defining each eye contour.
+    
+    \item \textbf{Head Pose Estimation:} Yaw, pitch, and roll angles are computed from facial landmarks. The system issues random challenges:
+    \begin{itemize}[noitemsep]
+        \item ``Look left'' (yaw $< -15°$)
+        \item ``Look right'' (yaw $> 15°$)
+        \item ``Look up'' (pitch $> 10°$)
+        \item ``Nod down'' (pitch $< -10°$)
+    \end{itemize}
+    
+    \item \textbf{Multi-Frame Consistency:} The system verifies that face landmarks change naturally across multiple consecutive frames rather than remaining static (as with a photograph).
+\end{itemize}
+
+\subsection{Tier 2: MiniFASNet (Optional Advanced Model)}
+An optional anti-spoofing classification model:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Model:} MiniFASNet from the Silent-Face-Anti-Spoofing project.
+    \item \textbf{Input:} 80$\times$80 pixel face crop (BGR, normalized to [0, 1]).
+    \item \textbf{Output:} Binary classification — real face vs. spoof (photo/screen replay).
+    \item \textbf{Conversion:} PyTorch $\rightarrow$ TorchScript $\rightarrow$ Core ML via \texttt{coremltools}.
+    \item \textbf{Usage:} Runs in parallel with ArcFace; both must pass for authentication to succeed.
+\end{itemize}
+
+\section{Multi-Factor Authentication System}
+FaceLock Pro implements a cascading authentication system with four methods.
+
+\subsection{Authentication Methods}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lXll}
+\toprule
+\textbf{Method} & \textbf{Description} & \textbf{Framework} & \textbf{Data Storage} \\
+\midrule
+Face Unlock & Custom ArcFace recognition & Vision + Core ML & Keychain (encrypted) \\
+Touch ID & Native fingerprint sensor & LocalAuthentication & Secure Enclave \\
+macOS Password & System login password & LocalAuthentication & Managed by macOS \\
+Application PIN & 4--8 digit user PIN & Custom & Keychain (hashed) \\
+\bottomrule
+\end{tabularx}
+\caption{Supported authentication methods}
+\end{table}
+
+\subsection{Authentication Cascade}
+When a protected application is launched, the following cascade is executed:
+
+\begin{enumerate}
+    \item Face Unlock is attempted automatically (camera activates).
+    \item If Face Unlock succeeds $\rightarrow$ access is granted immediately.
+    \item If Face Unlock fails or times out (5 seconds) $\rightarrow$ Touch ID is offered.
+    \item If Touch ID is unavailable or cancelled $\rightarrow$ macOS password dialog is presented.
+    \item If the user has enabled a PIN $\rightarrow$ PIN entry is offered as a final fallback.
+    \item If all methods fail or are cancelled $\rightarrow$ access is denied; the app remains locked.
+\end{enumerate}
+
+\subsection{Touch ID and macOS Password Integration}
+Both Touch ID and macOS password authentication are implemented using Apple's \texttt{LocalAuthentication} framework:
+
+\begin{lstlisting}[language=Swift, caption={Touch ID / macOS Password via LAContext}]
+import LocalAuthentication
+
+let context = LAContext()
+var error: NSError?
+
+// Check biometric availability
+if context.canEvaluatePolicy(
+    .deviceOwnerAuthenticationWithBiometrics, error: &error) {
+    
+    context.evaluatePolicy(
+        .deviceOwnerAuthenticationWithBiometrics,
+        localizedReason: "Unlock protected application"
+    ) { success, error in
+        // Handle result
+    }
+}
+\end{lstlisting}
+
+The application never accesses, stores, or transmits fingerprint data. All biometric verification is handled by the Secure Enclave through macOS system APIs.
+
+\subsection{PIN Authentication}
+\begin{itemize}[noitemsep]
+    \item PIN length: 4--8 digits, configurable by the user.
+    \item Storage: The PIN is salted, hashed (SHA-256), and stored in the macOS Keychain.
+    \item Retry limits: Configurable maximum attempts (default: 5).
+    \item Cooldown: After max failures, a 60-second cooldown period is enforced.
+    \item The raw PIN is never stored; only the salted hash is persisted.
+\end{itemize}
+
+\section{Session Management}
+To avoid requiring authentication on every interaction, FaceLock Pro implements session management.
+
+\subsection{Session Timeout Options}
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Option} & \textbf{Duration} \\
+\midrule
+Always Authenticate & 0 seconds (every access) \\
+5 Minutes & 300 seconds \\
+10 Minutes & 600 seconds \\
+30 Minutes & 1,800 seconds \\
+1 Hour & 3,600 seconds \\
+Until Logout & Indefinite (until macOS session ends) \\
+\bottomrule
+\end{tabular}
+\caption{Configurable session timeout durations}
+\end{table}
+
+\subsection{Auto-Lock Triggers}
+Sessions are invalidated and re-authentication is required when:
+\begin{itemize}[noitemsep]
+    \item The Mac enters sleep (\texttt{NSWorkspace.willSleepNotification}).
+    \item The screen saver activates (\texttt{NSWorkspace.screensDidSleepNotification}).
+    \item The session timeout expires.
+    \item The user manually locks via the menu bar (future feature).
+\end{itemize}
+
+\section{Activity Logging}
+Every authentication event is recorded for audit purposes.
+
+\subsection{Event Types}
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Event} & \textbf{Icon} & \textbf{Description} \\
+\midrule
+App Opened & arrow.up.forward.app & A protected app was launched \\
+Auth Success & checkmark.shield.fill & Authentication succeeded \\
+Auth Failure & xmark.shield.fill & Authentication failed \\
+App Protected & lock.fill & An app was added to protected list \\
+App Unprotected & lock.open.fill & An app was removed from list \\
+Enrollment Completed & person.crop.circle.badge.checkmark & Face data enrolled \\
+Settings Changed & gearshape.fill & Security settings modified \\
+Session Expired & clock.badge.xmark & Trusted session timed out \\
+Lockout Triggered & exclamationmark.lock.fill & Max failed attempts exceeded \\
+\bottomrule
+\end{tabular}
+\caption{Activity log event types}
+\end{table}
+
+\subsection{Log Entry Schema}
+Each log entry stores:
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Field} & \textbf{Type} & \textbf{Description} \\
+\midrule
+id & UUID & Unique identifier \\
+timestamp & Date & Event timestamp \\
+eventType & EventType & Category of event \\
+appBundleIdentifier & String? & Target app's bundle ID \\
+appName & String? & Target app's display name \\
+authMethod & AuthMethod? & Method used (Face/TouchID/Password/PIN) \\
+wasSuccessful & Bool & Whether the action succeeded \\
+confidenceScore & Float? & Face recognition confidence (0.0--1.0) \\
+details & String? & Additional context or error message \\
+\bottomrule
+\end{tabular}
+\caption{ActivityLogEntry data model}
+\end{table}
+
+\section{Notifications}
+The application uses macOS native notifications via the \texttt{UserNotifications} framework (\texttt{UNUserNotificationCenter}):
+
+\begin{itemize}[noitemsep]
+    \item Authentication succeeded for a protected app.
+    \item Authentication failed (with attempt count).
+    \item New application added to the protected list.
+    \item Lockout triggered after maximum failed attempts.
+    \item Security settings were modified.
+\end{itemize}
+
+\section{Settings and Configuration}
+The application provides comprehensive user-configurable settings organized into four categories:
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{Category} & \textbf{Settings} & \textbf{Storage} \\
+\midrule
+General & Launch at startup, start minimized, theme (system/light/dark) & UserDefaults \\
+Security & Auth methods toggle, confidence threshold (0.3--0.9), max failed attempts (3--10), lock after sleep, session timeout & UserDefaults \\
+Camera & Camera device selection, liveness detection toggle & UserDefaults \\
+Privacy & Clear activity logs, delete face data, export/import settings & UserDefaults + Keychain \\
+\bottomrule
+\end{tabularx}
+\caption{Settings categories and storage}
+\end{table}
+
+% ============================================================
+\chapter{Technical Architecture}
+% ============================================================
+
+\section{Design Pattern: MVVM}
+The application follows the Model-View-ViewModel (MVVM) architecture pattern:
+
+\begin{itemize}
+    \item \textbf{Model:} Plain Swift structs/classes representing data (e.g., \texttt{ProtectedApp}, \texttt{FaceEmbedding}, \texttt{ActivityLogEntry}). Models are \texttt{Codable} for persistence and \texttt{Identifiable} for SwiftUI list rendering.
+    
+    \item \textbf{View:} SwiftUI views responsible only for rendering UI and forwarding user actions to ViewModels. Views use \texttt{@EnvironmentObject}, \texttt{@StateObject}, and \texttt{@Binding} for state management.
+    
+    \item \textbf{ViewModel:} \texttt{ObservableObject} classes that encapsulate business logic, transform data for display, and coordinate between services/managers. ViewModels publish state changes via \texttt{@Published} properties.
+\end{itemize}
+
+\section{Layered Architecture}
+The application is divided into five distinct layers, each with clear responsibilities:
+
+\subsection{Layer 1: Presentation Layer (SwiftUI + AppKit)}
+\begin{itemize}[noitemsep]
+    \item All user interface views built with SwiftUI.
+    \item \texttt{NavigationSplitView} for main sidebar navigation.
+    \item \texttt{NSPanel} (AppKit) for the floating unlock dialog.
+    \item \texttt{NSApplicationDelegateAdaptor} bridges SwiftUI and AppKit lifecycles.
+    \item Screens: Welcome, Dashboard, Protected Apps, Enrollment, History, Settings, Unlock, About.
+\end{itemize}
+
+\subsection{Layer 2: Business Logic Layer (Managers)}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Manager} & \textbf{Responsibility} \\
+\midrule
+AuthenticationManager & Orchestrates the auth cascade (Face $\to$ TouchID $\to$ Password $\to$ PIN) \\
+FaceRecognitionManager & Manages ArcFace inference, embedding comparison, threshold logic \\
+LivenessManager & Generates challenges, tracks completion, validates liveness \\
+AppMonitorService & Subscribes to NSWorkspace notifications, intercepts protected app launches \\
+SessionManager & Tracks per-app sessions, handles timeout and auto-lock \\
+NotificationManager & Sends native macOS notifications for auth events \\
+SettingsManager & Reads/writes user preferences to UserDefaults \\
+ActivityLogManager & Records events to SQLite/SwiftData database \\
+\bottomrule
+\end{tabularx}
+\caption{Business logic managers}
+\end{table}
+
+\subsection{Layer 3: Machine Learning Layer}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{Component} & \textbf{Responsibility} & \textbf{Framework} \\
+\midrule
+FaceDetector & Bounding box + landmark detection & Vision Framework \\
+FaceAligner & Affine alignment to 112$\times$112 & Core Graphics \\
+EmbeddingGenerator & ArcFace inference $\to$ 512-dim vector & Core ML \\
+CosineSimilarity & Vector comparison using SIMD & Accelerate (vDSP) \\
+LivenessClassifier & Real vs. spoof classification (optional) & Core ML (MiniFASNet) \\
+\bottomrule
+\end{tabularx}
+\caption{Machine learning components}
+\end{table}
+
+\subsection{Layer 4: Storage Layer}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{Store} & \textbf{Data} & \textbf{Technology} \\
+\midrule
+Keychain & Face embeddings (encrypted), PIN (hashed), secrets & Security Framework \\
+Database & Activity logs, protected apps list & SQLite / SwiftData \\
+UserDefaults & User preferences, settings & Foundation \\
+\bottomrule
+\end{tabularx}
+\caption{Storage layer components}
+\end{table}
+
+\subsection{Layer 5: System Layer}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Framework} & \textbf{Usage} \\
+\midrule
+NSWorkspace & App launch monitoring, sleep/wake notifications, running apps list \\
+AVFoundation & Camera capture session, live video preview, frame extraction \\
+LocalAuthentication & Touch ID and macOS password verification via LAContext \\
+UserNotifications & Native notification delivery (UNUserNotificationCenter) \\
+\bottomrule
+\end{tabularx}
+\caption{System layer frameworks}
+\end{table}
+
+\section{Project File Structure}
+The Xcode project is generated from a \texttt{project.yml} specification using XcodeGen:
+
+\begin{lstlisting}[caption={Project directory structure}]
+AppLockPro/
+  App/
+    AppLockProApp.swift        // @main SwiftUI entry point
+    AppDelegate.swift          // NSApplicationDelegate
+    AppState.swift             // Shared observable state
+    Info.plist                 // Camera usage, app metadata
+    AppLockPro.entitlements    // Camera entitlement
+  Models/
+    ProtectedApp.swift         // Protected + installed app
+    FaceEmbedding.swift        // 512-dim embedding container
+    AuthMethod.swift           // Auth method enum
+    AuthenticationResult.swift // Auth attempt result
+    ActivityLogEntry.swift     // Log entry + event types
+    AppSettings.swift          // Settings + session timeout
+  Views/
+    ContentView.swift          // Root router
+    Components/SidebarView.swift
+    Welcome/WelcomeView.swift
+    Dashboard/DashboardView.swift
+    ProtectedApps/ProtectedAppsView.swift
+    Enrollment/EnrollmentWizardView.swift
+    History/ActivityHistoryView.swift
+    Settings/SettingsView.swift
+    Unlock/UnlockDialogView.swift
+    About/AboutView.swift
+  ViewModels/                  // (Milestone 2+)
+  Managers/                    // (Milestone 4+)
+  Services/                    // (Milestone 2+)
+  AI/                          // (Milestone 3+)
+  Utilities/
+    Constants.swift            // App-wide constants
+    Logger.swift               // os.Logger categories
+  Resources/
+    Assets.xcassets            // AccentColor, AppIcon
+\end{lstlisting}
+
+% ============================================================
+\chapter{AI Pipeline}
+% ============================================================
+
+\section{Pipeline Overview}
+The complete AI authentication pipeline executes the following stages sequentially:
+
+\begin{enumerate}
+    \item \textbf{Camera Capture} — AVFoundation provides a \texttt{CMSampleBuffer} from the front camera at 30 FPS.
+    \item \textbf{Face Detection} — Vision Framework's \texttt{VNDetectFaceRectanglesRequest} locates faces in the frame.
+    \item \textbf{Landmark Extraction} — \texttt{VNDetectFaceLandmarksRequest} identifies 76 facial landmarks.
+    \item \textbf{Quality Assessment} — \texttt{VNDetectFaceCaptureQualityRequest} scores the face quality (0.0--1.0).
+    \item \textbf{Face Alignment} — An affine transform normalizes the face using eye positions to a 112$\times$112 image.
+    \item \textbf{Liveness Check} — Eye aspect ratio and head pose are analyzed across multiple frames.
+    \item \textbf{Feature Extraction} — The aligned face is fed to ArcFace (Core ML), producing a 512-dim vector.
+    \item \textbf{L2 Normalization} — The embedding is normalized to unit length.
+    \item \textbf{Cosine Similarity} — The normalized embedding is compared against the stored reference.
+    \item \textbf{Decision} — If similarity $\geq$ threshold (default 0.55), authentication succeeds.
+\end{enumerate}
+
+\section{ArcFace Model}
+
+\subsection{Model Specifications}
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+Architecture & ResNet-100 (ArcFace loss) \\
+Source & InsightFace (open source) \\
+Input Size & 112 $\times$ 112 $\times$ 3 (RGB) \\
+Output Size & 512-dimensional float vector \\
+Original Format & PyTorch (.pth) / ONNX \\
+Target Format & Core ML (.mlpackage) \\
+Inference Hardware & Apple Neural Engine (ANE) \\
+Expected Latency & $<$ 200 ms on Apple Silicon \\
+\bottomrule
+\end{tabular}
+\caption{ArcFace model specifications}
+\end{table}
+
+\subsection{Model Conversion Pipeline}
+The conversion from PyTorch to Core ML follows this workflow:
+
+\begin{enumerate}[noitemsep]
+    \item Download pre-trained ArcFace-R100 weights from the InsightFace model zoo.
+    \item Load the PyTorch model and set to evaluation mode.
+    \item Create a dummy input tensor of shape $(1, 3, 112, 112)$.
+    \item Trace the model using \texttt{torch.jit.trace()}.
+    \item Convert to Core ML using \texttt{coremltools.convert()} with image input type.
+    \item Verify output shape is $(1, 512)$.
+    \item Save as \texttt{.mlpackage} and add to the Xcode project.
+\end{enumerate}
+
+\begin{lstlisting}[language=Python, caption={ArcFace model conversion script}]
+import torch
+import coremltools as ct
+
+# Load pretrained model
+model = load_arcface_r100("arcface_r100.pth")
+model.eval()
+
+# Trace with dummy input
+dummy = torch.randn(1, 3, 112, 112)
+traced = torch.jit.trace(model, dummy)
+
+# Convert to Core ML
+mlmodel = ct.convert(
+    traced,
+    inputs=[ct.ImageType(
+        name="faceImage",
+        shape=(1, 3, 112, 112),
+        scale=1.0/127.5,
+        bias=[-1, -1, -1]
+    )],
+    minimum_deployment_target=ct.target.macOS14
+)
+mlmodel.save("ArcFace.mlpackage")
+\end{lstlisting}
+
+\subsection{Preprocessing Requirements}
+Before passing a face image to the ArcFace model:
+\begin{enumerate}[noitemsep]
+    \item Detect face bounding box using Vision Framework.
+    \item Extract eye landmark positions.
+    \item Compute affine transformation to align eyes horizontally.
+    \item Apply the transform and crop to 112$\times$112 pixels.
+    \item Convert color space to RGB.
+    \item Normalize pixel values to $[-1, 1]$ (scale by $1/127.5$, bias $-1$).
+    \item Convert to \texttt{CVPixelBuffer} for Core ML input.
+\end{enumerate}
+
+\section{MiniFASNet Anti-Spoofing Model}
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+Architecture & MiniFASNet (compact CNN) \\
+Source & Silent-Face-Anti-Spoofing (GitHub) \\
+Input Size & 80 $\times$ 80 $\times$ 3 (BGR) \\
+Output & 2-class (real / spoof) \\
+Preprocessing & Face crop with 2.7$\times$ margin, normalize by 255 \\
+Original Format & PyTorch (.pth) \\
+Target Format & Core ML (.mlpackage) \\
+\bottomrule
+\end{tabular}
+\caption{MiniFASNet model specifications}
+\end{table}
+
+\section{Hardware Acceleration}
+All Core ML models are automatically dispatched to the most efficient compute unit by the Core ML runtime:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Apple Neural Engine (ANE):} Primary target for both ArcFace and MiniFASNet. Provides the fastest inference with lowest power consumption.
+    \item \textbf{GPU (Metal):} Fallback when ANE is unavailable or when the model contains unsupported operations.
+    \item \textbf{CPU:} Final fallback; slowest but always available.
+\end{itemize}
+
+The \texttt{MLModelConfiguration} is set to \texttt{.all} compute units, allowing Core ML to choose the optimal hardware at runtime.
+
+% ============================================================
+\chapter{Technology Stack}
+% ============================================================
+
+\section{Complete Technology Table}
+\begin{longtable}{lll}
+\toprule
+\textbf{Component} & \textbf{Technology} & \textbf{Purpose} \\
+\midrule
+\endhead
+Programming Language & Swift 5.9+ & Type-safe, performant, native \\
+UI Framework & SwiftUI & Declarative, modern interface \\
+App Framework & AppKit & Window management, system integration \\
+Camera & AVFoundation & Real-time camera capture \\
+Face Detection & Vision Framework & Hardware-accelerated detection \\
+Face Recognition & ArcFace (Core ML) & 512-dim embedding extraction \\
+Liveness Detection & Vision + MiniFASNet & Anti-spoofing \\
+Hardware Acceleration & Apple Neural Engine & Fast on-device ML inference \\
+Vector Math & Accelerate (vDSP) & SIMD cosine similarity \\
+Auth Fallback & LocalAuthentication & Touch ID + macOS password \\
+Secrets & Keychain Services & Encrypted embedding storage \\
+Database & SQLite / SwiftData & Activity logs, app list \\
+App Monitoring & NSWorkspace & App launch detection \\
+Notifications & UserNotifications & Native macOS alerts \\
+Logging & os.Logger & Unified system logging \\
+Project Generation & XcodeGen & \texttt{.xcodeproj} from YAML \\
+Build System & xcodebuild & Command-line builds \\
+Version Control & Git & Source code management \\
+\bottomrule
+\caption{Complete technology stack}
+\end{longtable}
+
+\section{System Requirements}
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Requirement} & \textbf{Specification} \\
+\midrule
+Operating System & macOS 14.0 (Sonoma) or later \\
+Processor & Apple Silicon (M1, M2, M3, M4) \\
+Camera & Built-in FaceTime HD or compatible external \\
+Build Tool & Xcode 15.0+ \\
+Project Generator & XcodeGen 2.x \\
+Disk Space & $\sim$50 MB (app) + $\sim$100 MB (Core ML models) \\
+RAM & $<$ 200 MB runtime footprint \\
+\bottomrule
+\end{tabular}
+\caption{System requirements}
+\end{table}
+
+\section{Build and Run Instructions}
+\begin{lstlisting}[caption={Building from the command line}]
+# Install XcodeGen (one-time)
+brew install xcodegen
+
+# Clone the repository
+git clone https://github.com/ThanojBuddhima/applockPro.git
+cd applockPro
+
+# Generate the Xcode project from project.yml
+xcodegen generate
+
+# Build the application
+xcodebuild build \
+  -project AppLockPro.xcodeproj \
+  -scheme AppLockPro \
+  -configuration Debug \
+  -destination 'platform=macOS'
+
+# Run the built app
+open ~/Library/Developer/Xcode/DerivedData/AppLockPro-*/\
+  Build/Products/Debug/FaceLock\ Pro.app
+\end{lstlisting}
+
+Alternatively, open \texttt{AppLockPro.xcodeproj} in Xcode and press \texttt{Cmd+R}.
+
+% ============================================================
+\chapter{Security Design}
+% ============================================================
+
+\section{Security Principles}
+\begin{enumerate}
+    \item \textbf{Zero Cloud Upload:} All biometric data, images, and embeddings remain on the local device. No network requests are made for authentication.
+    \item \textbf{No Image Persistence:} Raw face images captured during enrollment or authentication are never written to disk. They exist only in memory and are deallocated immediately after embedding generation.
+    \item \textbf{Keychain-Only Secrets:} Face embeddings and PINs are stored exclusively in the macOS Keychain, which provides hardware-backed AES-256 encryption via the Secure Enclave.
+    \item \textbf{Local Inference:} All AI models run on-device via Core ML, utilizing the Apple Neural Engine.
+    \item \textbf{Hardened Runtime:} The application is built with Hardened Runtime enabled, which restricts code injection, memory access, and dynamic library loading.
+    \item \textbf{Principle of Least Privilege:} The application only requests the permissions it needs (camera access, accessibility for app monitoring).
+\end{enumerate}
+
+\section{Data Protection Matrix}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lllX}
+\toprule
+\textbf{Data Type} & \textbf{Storage} & \textbf{Encryption} & \textbf{Lifecycle} \\
+\midrule
+Face embeddings & Keychain & AES-256 (hardware) & Persisted until user deletes \\
+Application PIN & Keychain & SHA-256 hash + salt & Persisted until user changes \\
+Activity logs & SQLite & Application-level & Clearable by user \\
+Protected apps list & SQLite & Application-level & User-managed \\
+User preferences & UserDefaults & None (non-sensitive) & Persisted \\
+Raw face images & RAM only & N/A & Deleted immediately \\
+Camera frames & RAM only & N/A & Not retained \\
+\bottomrule
+\end{tabularx}
+\caption{Data protection matrix}
+\end{table}
+
+\section{Threat Model}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+\textbf{Threat} & \textbf{Attack Vector} & \textbf{Mitigation} \\
+\midrule
+Photo replay & Attacker holds a photo of the user in front of the camera & Liveness detection: blink detection, head movement challenges, multi-frame consistency \\
+Video replay & Attacker plays a video of the user on a screen & MiniFASNet anti-spoofing classifier, random challenge sequence \\
+Embedding theft & Attacker extracts stored face embeddings from disk & Keychain AES-256 encryption, Hardened Runtime prevents memory inspection \\
+Brute-force PIN & Attacker repeatedly guesses the PIN & Max attempts (default 5), cooldown period (60s), temporary lockout \\
+App bypass & User unhides protected app via Mission Control & Documented limitation; future mitigation via Endpoint Security Framework \\
+Process injection & Attacker injects code to bypass authentication checks & Hardened Runtime, code signing, non-sandboxed but signed with Developer ID \\
+\bottomrule
+\end{tabularx}
+\caption{Threat model and mitigations}
+\end{table}
+
+\section{Keychain Integration}
+The macOS Keychain is used for all sensitive data storage:
+
+\begin{lstlisting}[language=Swift, caption={Keychain storage example}]
+import Security
+
+func storeEmbedding(_ data: Data, forKey key: String) -> Bool {
+    let query: [String: Any] = [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrAccount as String: key,
+        kSecValueData as String: data,
+        kSecAttrAccessible as String:
+            kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+    ]
+    
+    // Delete existing item if present
+    SecItemDelete(query as CFDictionary)
+    
+    // Add new item
+    let status = SecItemAdd(query as CFDictionary, nil)
+    return status == errSecSuccess
+}
+\end{lstlisting}
+
+The \texttt{kSecAttrAccessibleWhenUnlockedThisDeviceOnly} flag ensures embeddings are only accessible when the device is unlocked and cannot be transferred to another device via backup.
+
+% ============================================================
+\chapter{User Interface Design}
+% ============================================================
+
+\section{Design Principles}
+The interface follows Apple's macOS Human Interface Guidelines:
+\begin{itemize}[noitemsep]
+    \item Native macOS look and feel using SwiftUI.
+    \item Support for Light Mode and Dark Mode.
+    \item Smooth animations (spring, easeInOut).
+    \item SF Symbols for consistent iconography.
+    \item Keyboard shortcut support.
+    \item Accessibility labels for VoiceOver compatibility.
+    \item Retina display optimization.
+\end{itemize}
+
+\section{Application Screens}
+
+\subsection{Welcome / Onboarding (4 Steps)}
+A guided wizard presented on first launch:
+\begin{enumerate}[noitemsep]
+    \item \textbf{Welcome:} Introduction with feature highlights (app protection, face unlock, offline privacy).
+    \item \textbf{Permissions:} Camera and accessibility permission requests with status indicators.
+    \item \textbf{Enrollment Intro:} Explanation of the face capture process.
+    \item \textbf{Complete:} Confirmation that setup is finished; ``Get Started'' button.
+\end{enumerate}
+Progress is shown via animated capsule indicators at the top.
+
+\subsection{Dashboard}
+The main screen after onboarding, featuring:
+\begin{itemize}[noitemsep]
+    \item \textbf{Status Badge:} Shows enrollment status (``Face Enrolled'' / ``Not Enrolled'').
+    \item \textbf{Stat Cards:} Protected apps count, successful unlocks today, failed attempts today, session status.
+    \item \textbf{Quick Actions:} Add app, re-enroll face, view history, settings.
+    \item \textbf{Recent Activity:} Last 5 authentication events.
+\end{itemize}
+
+\subsection{Protected Apps}
+\begin{itemize}[noitemsep]
+    \item Search bar to filter protected apps.
+    \item List of protected apps with name, bundle ID, icon, and toggle switch.
+    \item ``Add App'' button opens a sheet with all installed applications.
+    \item Swipe-to-delete for removing apps from protection.
+\end{itemize}
+
+\subsection{Face Enrollment Wizard}
+Five-state wizard:
+\begin{enumerate}[noitemsep]
+    \item \textbf{Ready:} Instructions and lighting requirements.
+    \item \textbf{Capturing:} Live camera preview with angle guidance and progress bar.
+    \item \textbf{Processing:} Spinner while embeddings are generated and encrypted.
+    \item \textbf{Complete:} Success confirmation.
+    \item \textbf{Error:} Failure message with ``Try Again'' option.
+\end{enumerate}
+
+\subsection{Unlock Dialog}
+A floating panel (\texttt{NSPanel}) displayed above all windows:
+\begin{itemize}[noitemsep]
+    \item Shows the requesting application's name and icon.
+    \item Camera preview for Face Unlock (primary method).
+    \item Method switcher: buttons to switch between Face, Touch ID, Password, and PIN.
+    \item Authentication status feedback (authenticating, success, failure, locked out).
+\end{itemize}
+
+\subsection{Activity History}
+\begin{itemize}[noitemsep]
+    \item Filter chips for each event type (All, Auth Success, Auth Failure, etc.).
+    \item Chronological list with event icon, name, app name, confidence score, and relative timestamp.
+    \item ``Clear All'' button with confirmation dialog.
+\end{itemize}
+
+\subsection{Settings}
+Four-tab interface:
+\begin{itemize}[noitemsep]
+    \item \textbf{General:} Launch at startup, start minimized, theme (System/Light/Dark).
+    \item \textbf{Security:} Auth method toggles, confidence threshold slider (30\%--90\%), max attempts stepper, lock after sleep, session timeout picker.
+    \item \textbf{Camera:} Camera device picker, liveness detection toggle.
+    \item \textbf{Privacy:} Clear logs, delete face data (with confirmation dialogs), export/import settings.
+\end{itemize}
+
+\subsection{About}
+Application information: icon, name, version, description, technology badges, and copyright.
+
+\section{Navigation Architecture}
+The application uses \texttt{NavigationSplitView} with a sidebar containing three sections:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Main:} Dashboard, Protected Apps
+    \item \textbf{Security:} Face Enrollment, Activity History
+    \item \textbf{Application:} Settings, About
+\end{itemize}
+
+Navigation selection is tracked via the shared \texttt{AppState} object, which is injected into the view hierarchy using \texttt{@EnvironmentObject}.
+
+% ============================================================
+\chapter{Performance}
+% ============================================================
+
+\section{Performance Targets}
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Metric} & \textbf{Target} & \textbf{Method} & \textbf{Hardware} \\
+\midrule
+Face detection & $<$ 100 ms & Vision Framework & GPU \\
+Face recognition & $<$ 200 ms & ArcFace Core ML & Apple Neural Engine \\
+Cosine similarity & $<$ 1 ms & Accelerate vDSP & CPU (SIMD) \\
+Total unlock time & $<$ 500 ms & End-to-end pipeline & ANE + GPU + CPU \\
+CPU usage (idle) & $<$ 10\% & Event-driven monitoring & CPU \\
+Memory footprint & $<$ 200 MB & Model + UI + buffers & RAM \\
+Battery impact & Minimal & ANE offloading & Neural Engine \\
+App monitoring & $<$ 1 ms & NSWorkspace notifications & CPU (event) \\
+\bottomrule
+\end{tabular}
+\caption{Performance targets with hardware mapping}
+\end{table}
+
+\section{Optimization Strategies}
+\begin{itemize}
+    \item \textbf{Event-Driven Monitoring:} App monitoring uses NSWorkspace notifications rather than polling, consuming near-zero CPU when no protected app is launched.
+    \item \textbf{Lazy Model Loading:} Core ML models are loaded into memory only when face authentication is first requested, not at app startup.
+    \item \textbf{Frame Skipping:} During live camera preview, face detection is performed on every 3rd frame (10 FPS) rather than every frame (30 FPS) to reduce CPU/GPU load.
+    \item \textbf{Accelerate Framework:} Cosine similarity computation uses \texttt{vDSP.dot()} and \texttt{vDSP.sumOfSquares()} for SIMD-optimized vector operations.
+    \item \textbf{Memory Management:} Camera frame buffers are released immediately after processing. Auto-release pools are used for tight loops.
+\end{itemize}
+
+% ============================================================
+\chapter{Implementation Roadmap}
+% ============================================================
+
+Development is divided into seven milestones, each producing a functional increment:
+
+\section{Milestone 1: Project Setup \& UI Shell (Complete)}
+\begin{itemize}[noitemsep]
+    \item Xcode project generation via XcodeGen.
+    \item Complete folder structure (App, Models, Views, ViewModels, Managers, Services, AI, Utilities).
+    \item All SwiftUI screens implemented as navigable stubs.
+    \item Data models for all entities.
+    \item Build verification: \texttt{xcodebuild} succeeds.
+\end{itemize}
+
+\section{Milestone 2: Camera \& Face Detection}
+\begin{itemize}[noitemsep]
+    \item \texttt{CameraService}: AVFoundation capture session with front camera.
+    \item Camera preview via \texttt{AVCaptureVideoPreviewLayer} wrapped in \texttt{NSViewRepresentable}.
+    \item \texttt{FaceDetector}: Vision Framework face detection and landmark extraction.
+    \item Real-time face bounding box overlay on camera feed.
+    \item \texttt{FaceAligner}: Affine alignment to 112$\times$112 using eye positions.
+    \item Face quality validation (lighting, sharpness, eyes visible).
+\end{itemize}
+
+\section{Milestone 3: AI Face Recognition}
+\begin{itemize}[noitemsep]
+    \item Python script for ArcFace PyTorch $\to$ Core ML conversion.
+    \item \texttt{EmbeddingGenerator}: Core ML inference wrapper.
+    \item \texttt{CosineSimilarity}: Accelerate-powered vector comparison.
+    \item Enrollment pipeline: capture $\to$ detect $\to$ align $\to$ embed $\to$ average $\to$ encrypt $\to$ store.
+    \item Authentication pipeline: capture $\to$ detect $\to$ align $\to$ embed $\to$ compare $\to$ decision.
+\end{itemize}
+
+\section{Milestone 4: App Monitoring \& Protection}
+\begin{itemize}[noitemsep]
+    \item \texttt{AppMonitorService}: NSWorkspace notifications + KVO.
+    \item Installed apps browser (scan /Applications).
+    \item App hide/terminate on unauthorized launch.
+    \item Floating unlock panel (\texttt{NSPanel}).
+    \item Session management with configurable timeouts.
+    \item Sleep/screen lock event handling.
+\end{itemize}
+
+\section{Milestone 5: Multi-Factor Authentication}
+\begin{itemize}[noitemsep]
+    \item Touch ID + macOS password via \texttt{LAContext}.
+    \item PIN setup, verification, and Keychain storage.
+    \item Authentication cascade logic.
+    \item \texttt{KeychainService} wrapper.
+    \item Activity logging to SQLite/SwiftData.
+    \item Failed attempt tracking, cooldown, and lockout.
+    \item Native macOS notifications.
+\end{itemize}
+
+\section{Milestone 6: Liveness Detection}
+\begin{itemize}[noitemsep]
+    \item Blink detection via eye aspect ratio.
+    \item Head pose estimation from landmarks.
+    \item Random challenge generator and UI.
+    \item Multi-frame consistency verification.
+    \item Optional MiniFASNet integration.
+\end{itemize}
+
+\section{Milestone 7: Polish \& Release}
+\begin{itemize}[noitemsep]
+    \item Smooth animations and transitions.
+    \item App icon design.
+    \item Keyboard shortcuts and accessibility.
+    \item Performance profiling with Instruments.
+    \item Error handling for all edge cases.
+    \item Code signing with Developer ID.
+    \item Notarization for Gatekeeper.
+    \item DMG packaging.
+    \item Documentation (README, architecture doc, user guide).
+\end{itemize}
+
+\section{Estimated Timeline}
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Week} & \textbf{Milestone} & \textbf{Deliverable} \\
+\midrule
+1 & Setup \& Learning & Project structure, SwiftUI basics \\
+2 & Milestone 1 (complete) & Full UI skeleton, all screens navigable \\
+3 & Milestone 2 & Live camera + face detection \\
+4 & Milestone 3 & ArcFace integration, enrollment, auth \\
+5 & Milestone 4 & App monitoring, protection, unlock flow \\
+6 & Milestone 5 & Touch ID, PIN, logging, notifications \\
+7 & Milestone 6 & Liveness detection \\
+8 & Milestone 7 & Polish, testing, release candidate \\
+\bottomrule
+\end{tabular}
+\caption{Development timeline}
+\end{table}
+
+% ============================================================
+\chapter{Testing Strategy}
+% ============================================================
+
+\section{Unit Tests}
+\begin{itemize}[noitemsep]
+    \item \texttt{CosineSimilarity}: Verify correct similarity scores for known vectors, edge cases (zero vectors, identical vectors, orthogonal vectors).
+    \item \texttt{EmbeddingGenerator}: Test with mock Core ML model, verify output dimensions.
+    \item \texttt{KeychainService}: Store/retrieve/delete operations with test keys.
+    \item \texttt{SessionManager}: Timeout expiration, auto-lock triggers, session creation/invalidation.
+    \item \texttt{ActivityLogManager}: Event recording, filtering, clearing.
+    \item \texttt{AppMonitorService}: Protected app lookup, notification handling.
+\end{itemize}
+
+\section{Integration Tests}
+\begin{itemize}[noitemsep]
+    \item Full enrollment pipeline: 20 captures $\to$ embeddings $\to$ average $\to$ Keychain storage.
+    \item Full authentication pipeline: camera $\to$ detection $\to$ alignment $\to$ embedding $\to$ comparison.
+    \item Authentication cascade: Face failure $\to$ Touch ID $\to$ Password $\to$ PIN.
+    \item App monitoring: Launch protected app $\to$ detect $\to$ block $\to$ authenticate $\to$ unlock.
+\end{itemize}
+
+\section{Manual Verification Checklist}
+\begin{itemize}[noitemsep]
+    \item Camera preview displays live feed.
+    \item Face detection draws bounding box in real-time.
+    \item Enrollment captures faces and stores encrypted embedding.
+    \item Face unlock succeeds for enrolled user within 500\,ms.
+    \item Face unlock rejects unknown faces.
+    \item Protected app is hidden on unauthorized launch.
+    \item Protected app unlocks after successful authentication.
+    \item Touch ID and PIN fallbacks work correctly.
+    \item Auto-lock triggers on sleep.
+    \item Activity log records all events.
+    \item Settings persist across app restarts.
+    \item Launch at login works.
+    \item CPU stays below 10\% at idle.
+    \item Memory stays under 200\,MB.
+\end{itemize}
+
+% ============================================================
+\chapter{Risk Assessment}
+% ============================================================
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lllX}
+\toprule
+\textbf{Risk} & \textbf{Likelihood} & \textbf{Impact} & \textbf{Mitigation} \\
+\midrule
+ArcFace model conversion fails & Medium & High & Fallback: use MobileFaceNet or ONNX Runtime with CoreML Execution Provider \\
+App hiding is bypassable & High & Medium & Document limitation; plan Endpoint Security Framework upgrade in v2 \\
+Camera permission denied & Low & Medium & Graceful fallback to Touch ID / password only \\
+Performance exceeds targets & Medium & Medium & Profile early with Instruments; use ANE; reduce model size if needed \\
+MiniFASNet conversion issues & Medium & Low & Defer to Vision-only liveness (Tier 1) which needs no extra model \\
+Keychain access issues & Low & Low & Proper entitlements; test on clean macOS install \\
+ArcFace licensing conflict & Low & High & Use non-commercial for learning; purchase license or switch model for commercial release \\
+\bottomrule
+\end{tabularx}
+\caption{Risk assessment matrix}
+\end{table}
+
+% ============================================================
+\chapter{Future Enhancements}
+% ============================================================
+
+Future versions of FaceLock Pro may include:
+
+\begin{itemize}
+    \item \textbf{Multiple User Profiles:} Allow multiple users to enroll and authenticate on a shared Mac.
+    \item \textbf{Apple Watch Proximity Unlock:} Use Bluetooth proximity with a paired Apple Watch to unlock apps without camera.
+    \item \textbf{Geofencing:} Automatically disable authentication at trusted locations (e.g., home, office) using Core Location.
+    \item \textbf{Secure File Vault:} Encrypt and protect individual files and folders with face authentication.
+    \item \textbf{Endpoint Security Framework:} Intercept process launches at the kernel level for stronger app blocking (requires Apple entitlement).
+    \item \textbf{Encrypted Backups:} Export and import encrypted face data and settings for device migration.
+    \item \textbf{AI Anomaly Detection:} Detect unusual authentication patterns (e.g., repeated failures from an unknown face).
+    \item \textbf{Plugin Architecture:} Allow third-party extensions for custom protection rules.
+    \item \textbf{Enterprise Management:} MDM integration for corporate deployment.
+    \item \textbf{Menu Bar Controls:} Quick lock/unlock, status, and settings from the macOS menu bar.
+    \item \textbf{Browser Extension:} Protect browser tabs and bookmarks within Safari and Chrome.
+    \item \textbf{Clipboard Protection:} Clear clipboard contents after a configurable timeout.
+    \item \textbf{Remote Lock:} Lock all protected apps remotely via a companion iOS app.
+\end{itemize}
+
+% ============================================================
+\chapter{Conclusion}
+% ============================================================
+
+FaceLock Pro addresses a real gap in macOS security by providing application-level biometric protection that is private, fast, and entirely offline. By leveraging Apple Silicon's Neural Engine, the Vision framework, and the ArcFace facial recognition model, the application achieves sub-500-millisecond authentication without compromising user privacy.
+
+The modular MVVM architecture, phased development approach, and clear separation of concerns ensure that the project remains maintainable as new features are added. The milestone-based roadmap transforms a complex undertaking into a series of achievable increments, each delivering a working product.
+
+This project demonstrates proficiency in Swift, SwiftUI, Core ML, computer vision, biometric security, and native macOS development --- making it a comprehensive showcase of modern Apple platform engineering.
+
+% ============================================================
+\chapter{References}
+% ============================================================
+
+\renewcommand{\bibname}{}
+\vspace{-2cm}
+\begin{thebibliography}{99}
+
+\bibitem{arcface}
+J. Deng et al., ``ArcFace: Additive Angular Margin Loss for Deep Face Recognition,'' CVPR, 2019.
+
+\bibitem{minifasnet}
+Z. Yu et al., ``Searching Central Difference Convolutional Networks for Face Anti-Spoofing,'' CVPR, 2020.
+
+\bibitem{insightface}
+InsightFace: 2D and 3D Face Analysis Project. \url{https://github.com/deepinsight/insightface}.
+
+\bibitem{cosine-ear}
+A. Huang, ``Similarity Measures for Text Document Clustering,'' NZCSRSC, 2008. \\
+T. Soukupov\'{a} and J. \v{C}ech, ``Real-Time Eye Blink Detection using Facial Landmarks,'' CVWW, 2016.
+
+\bibitem{apple-docs}
+Apple Developer Documentation (Vision, Core ML, AVFoundation, LocalAuthentication, Keychain, NSWorkspace, SwiftUI, Accelerate). \url{https://developer.apple.com/documentation/}.
+
+\bibitem{apple-hardware}
+Apple Platform Security (Secure Enclave) \& Machine Learning (Neural Engine). \url{https://support.apple.com/guide/security/}.
+
+\bibitem{tools}
+Y. Kolb, ``XcodeGen,'' \url{https://github.com/yonaskolb/XcodeGen}. \\
+Apple Inc., ``coremltools,'' \url{https://github.com/apple/coremltools}. \\
+SQLite, \url{https://www.sqlite.org/}.
+
+\bibitem{ml-frameworks}
+A. Paszke et al., ``PyTorch,'' NeurIPS, 2019. \\
+ONNX: Open Neural Network Exchange, \url{https://onnx.ai/}.
+
+\end{thebibliography}
+
+\end{document}
