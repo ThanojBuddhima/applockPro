@@ -5,7 +5,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         print("[AppLockPro] Application launched successfully.")
-        // Future: Start AppMonitorService, check enrollment status
+        // Start monitoring for application launches (App Blocking)
+        AppMonitorService.shared.startMonitoring()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
