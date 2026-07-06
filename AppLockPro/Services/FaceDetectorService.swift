@@ -6,6 +6,7 @@ import OSLog
 struct FaceDetectionResult {
     let boundingBox: CGRect // Normalized [0, 1] coordinates, relative to bottom-left
     let quality: Float // 0.0 to 1.0
+    let pixelBuffer: CVPixelBuffer?
 }
 
 final class FaceDetectorService: ObservableObject {
@@ -62,7 +63,7 @@ final class FaceDetectorService: ObservableObject {
             }
             
             let quality = qualityObs.faceCaptureQuality ?? 0.0
-            let result = FaceDetectionResult(boundingBox: faceObs.boundingBox, quality: quality)
+            let result = FaceDetectionResult(boundingBox: faceObs.boundingBox, quality: quality, pixelBuffer: pixelBuffer)
             
             DispatchQueue.main.async {
                 self.currentFace = result

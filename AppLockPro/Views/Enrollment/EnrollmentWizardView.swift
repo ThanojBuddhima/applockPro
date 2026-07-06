@@ -151,7 +151,7 @@ struct EnrollmentWizardView: View {
 
     private func processEmbeddings() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            viewModel.saveDummyEmbedding()
+            // Embedding is already saved automatically when capturing finishes.
             withAnimation {
                 enrollmentState = .complete
             }

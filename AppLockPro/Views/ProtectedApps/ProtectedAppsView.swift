@@ -4,13 +4,13 @@ import SwiftUI
 struct ProtectedAppsView: View {
     @State private var searchText = ""
     @State private var showingAppPicker = false
-    @State private var protectedApps: [ProtectedApp] = []
+    @ObservedObject private var appManager = AppManager.shared
 
     var filteredApps: [ProtectedApp] {
         if searchText.isEmpty {
-            return protectedApps
+            return appManager.protectedApps
         }
-        return protectedApps.filter {
+        return appManager.protectedApps.filter {
             $0.name.localizedCaseInsensitiveContains(searchText)
         }
     }
@@ -22,7 +22,7 @@ struct ProtectedAppsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Protected Apps")
                         .font(.largeTitle.bold())
-                    Text("\(protectedApps.count) app\(protectedApps.count == 1 ? "" : "s") protected")
+                    Text("\(appManager.protectedApps.count) app\(appManager.protectedApps.count == 1 ? "" : "s") protected")
                         .font(.title3)
                         .foregroundStyle(.secondary)
                 }
@@ -68,7 +68,7 @@ struct ProtectedAppsView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .sheet(isPresented: $showingAppPicker) {
-            AppPickerView(protectedApps: $protectedApps)
+            AppPickerView()
         }
     }
 
@@ -117,7 +117,21 @@ struct ProtectedAppsView: View {
 
             Spacer()
 
-            Toggle("Protected", isOn: .constant(app.isProtected))
+            let isProtectedBinding = Binding<Bool>(
+                get: {
+                    if let index = appManager.protectedApps.firstIndex(where: { $0.id == app.id }) {
+                        return appManager.protectedApps[index].isProtected
+                    }
+                    return false
+                },
+                set: { newValue in
+                    if let index = appManager.protectedApps.firstIndex(where: { $0.id == app.id }) {
+                        appManager.protectedApps[index].isProtected = newValue
+                    }
+                }
+            )
+
+            Toggle("Protected", isOn: isProtectedBinding)
                 .toggleStyle(.switch)
                 .labelsHidden()
         }
@@ -125,15 +139,27 @@ struct ProtectedAppsView: View {
     }
 
     private func removeApps(at offsets: IndexSet) {
-        protectedApps.remove(atOffsets: offsets)
+        let appsToRemove = offsets.map { filteredApps[$0] }
+        for app in appsToRemove {
+            appManager.removeApp(bundleIdentifier: app.bundleIdentifier)
+        }
     }
 }
 
 /// Sheet view for picking installed apps to protect.
 struct AppPickerView: View {
     @Environment(\.dismiss) private var dismiss
-    @Binding var protectedApps: [ProtectedApp]
+    @ObservedObject private var appManager = AppManager.shared
     @State private var searchText = ""
+    @State private var installedApps: [InstalledApp] = []
+    @State private var isLoading = true
+    
+    var filteredApps: [InstalledApp] {
+        if searchText.isEmpty {
+            return installedApps
+        }
+        return installedApps.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -160,17 +186,68 @@ struct AppPickerView: View {
             .background(.background.secondary, in: RoundedRectangle(cornerRadius: 8))
             .padding()
 
-            // Placeholder list
-            VStack(spacing: 12) {
-                Text("Application list will be populated from /Applications")
-                    .foregroundStyle(.secondary)
-                Text("Coming in Milestone 4")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
+            // App List
+            if isLoading {
+                ProgressView("Scanning for applications...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if filteredApps.isEmpty {
+                VStack {
+                    Image(systemName: "magnifyingglass")
+                        .font(.largeTitle)
+                        .foregroundStyle(.tertiary)
+                    Text("No applications found")
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 8)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List(filteredApps) { app in
+                    HStack(spacing: 12) {
+                        Image(nsImage: app.icon)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 32, height: 32)
+                        
+                        VStack(alignment: .leading) {
+                            Text(app.name).font(.headline)
+                            Text(app.path).font(.caption).foregroundStyle(.secondary).truncationMode(.middle)
+                        }
+                        
+                        Spacer()
+                        
+                        let isProtected = appManager.protectedApps.contains { $0.bundleIdentifier == app.bundleIdentifier }
+                        if isProtected {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                                .font(.title2)
+                        } else {
+                            Button("Add") {
+                                let newApp = ProtectedApp(name: app.name, bundleIdentifier: app.bundleIdentifier, path: app.path)
+                                appManager.addApp(newApp)
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+                .listStyle(.inset(alternatesRowBackgrounds: true))
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(width: 500, height: 500)
+        .frame(width: 550, height: 600)
+        .onAppear {
+            loadApps()
+        }
+    }
+    
+    private func loadApps() {
+        isLoading = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            let fetchedApps = AppListService.shared.fetchInstalledApps()
+            DispatchQueue.main.async {
+                self.installedApps = fetchedApps
+                self.isLoading = false
+            }
+        }
     }
 }
 

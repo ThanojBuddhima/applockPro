@@ -60,12 +60,30 @@ final class EnrollmentViewModel: ObservableObject {
                 isFinishedCapturing = true
                 currentInstruction = "Processing..."
                 stopCamera()
+                
+                // If we have a pixel buffer, generate the embedding
+                if let buffer = result.pixelBuffer {
+                    saveRealEmbedding(from: buffer)
+                } else {
+                    currentInstruction = "Error: No pixel buffer available."
+                }
             }
         }
     }
     
-    func saveDummyEmbedding() {
-        // In Milestone 3, we will use ArcFace to generate the actual embeddings from the captured frames.
-        // For now, we simulate a delay and saving to Keychain.
+    private func saveRealEmbedding(from buffer: CVPixelBuffer) {
+        FaceRecognitionService.shared.generateEmbedding(from: buffer) { [weak self] embedding in
+            guard let self = self, let embedding = embedding else {
+                self?.currentInstruction = "Failed to extract face features."
+                return
+            }
+            
+            let success = KeychainManager.shared.saveEmbedding(embedding)
+            if success {
+                self.currentInstruction = "Face successfully enrolled!"
+            } else {
+                self.currentInstruction = "Failed to save face securely."
+            }
+        }
     }
 }
