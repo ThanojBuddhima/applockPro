@@ -8,6 +8,9 @@ struct WelcomeView: View {
     @State private var currentStep: OnboardingStep = .welcome
     @State private var cameraGranted = false
     @State private var accessibilityGranted = false
+    
+    // Timer to automatically poll permission state
+    let timer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
 
     enum OnboardingStep: Int, CaseIterable {
         case welcome
@@ -159,7 +162,7 @@ struct WelcomeView: View {
             .padding(.top, 10)
             
             if !accessibilityGranted {
-                Text("Clicking 'Grant Access' for Accessibility will open System Settings. Check the box for FaceLock Pro, then click the button again to verify.")
+                Text("Clicking 'Grant Access' for Accessibility will open System Settings. Check the box for FaceLock Pro, then return here.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -168,6 +171,11 @@ struct WelcomeView: View {
         }
         .onAppear {
             checkPermissions()
+        }
+        .onReceive(timer) { _ in
+            if currentStep == .permissions {
+                checkPermissions()
+            }
         }
     }
 

@@ -3,10 +3,8 @@ import SwiftUI
 /// Face enrollment wizard that guides the user through setting up facial recognition.
 struct EnrollmentWizardView: View {
     @EnvironmentObject var appState: AppState
+    @StateObject private var viewModel = EnrollmentViewModel()
     @State private var enrollmentState: EnrollmentState = .ready
-    @State private var captureProgress: Double = 0
-    @State private var capturedCount: Int = 0
-    @State private var currentInstruction: String = "Position your face in the center"
 
     enum EnrollmentState {
         case ready
@@ -93,35 +91,49 @@ struct EnrollmentWizardView: View {
 
     private var capturingContent: some View {
         VStack(spacing: 24) {
-            // Camera preview placeholder
-            RoundedRectangle(cornerRadius: 16)
-                .fill(.black)
+            // Live Camera Preview
+            CameraPreviewView(session: viewModel.cameraService.captureSession)
                 .frame(width: 320, height: 240)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
                 .overlay {
-                    VStack(spacing: 12) {
-                        Image(systemName: "camera.fill")
-                            .font(.system(size: 40))
-                            .foregroundStyle(.white.opacity(0.5))
-                        Text("Camera Preview")
-                            .foregroundStyle(.white.opacity(0.5))
-                        Text("Coming in Milestone 2")
-                            .font(.caption)
-                            .foregroundStyle(.white.opacity(0.3))
+                    if let face = viewModel.faceDetector.currentFace {
+                        GeometryReader { geo in
+                            Rectangle()
+                                .stroke(face.quality > 0.4 ? Color.green : Color.yellow, lineWidth: 3)
+                                .frame(width: face.boundingBox.width * geo.size.width,
+                                       height: face.boundingBox.height * geo.size.height)
+                                .offset(x: face.boundingBox.minX * geo.size.width,
+                                        y: (1 - face.boundingBox.maxY) * geo.size.height)
+                        }
+                    }
+                }
+                .onAppear {
+                    viewModel.startCamera()
+                }
+                .onDisappear {
+                    viewModel.stopCamera()
+                }
+                .onChange(of: viewModel.isFinishedCapturing) { _, finished in
+                    if finished {
+                        withAnimation {
+                            enrollmentState = .processing
+                            processEmbeddings()
+                        }
                     }
                 }
 
             // Instruction
-            Text(currentInstruction)
+            Text(viewModel.currentInstruction)
                 .font(.title3.bold())
                 .foregroundStyle(.tint)
 
             // Progress
             VStack(spacing: 8) {
-                ProgressView(value: captureProgress)
+                ProgressView(value: viewModel.captureProgress)
                     .progressViewStyle(.linear)
                     .frame(width: 300)
 
-                Text("\(capturedCount) / \(totalCaptures) captures")
+                Text("\(viewModel.capturedCount) / \(viewModel.totalCaptures) captures")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -129,12 +141,20 @@ struct EnrollmentWizardView: View {
             // Cancel button
             Button("Cancel") {
                 withAnimation {
+                    viewModel.stopCamera()
                     enrollmentState = .ready
-                    captureProgress = 0
-                    capturedCount = 0
                 }
             }
             .buttonStyle(.bordered)
+        }
+    }
+
+    private func processEmbeddings() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            viewModel.saveDummyEmbedding()
+            withAnimation {
+                enrollmentState = .complete
+            }
         }
     }
 
