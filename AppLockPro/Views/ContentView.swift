@@ -8,11 +8,18 @@ struct ContentView: View {
         Group {
             if !appState.onboardingCompleted {
                 WelcomeView()
+            } else if !appState.isAppUnlocked {
+                AppLockedView()
             } else {
                 MainAppView()
             }
         }
         .animation(.easeInOut(duration: 0.3), value: appState.onboardingCompleted)
+        .animation(.easeInOut(duration: 0.3), value: appState.isAppUnlocked)
+        .onDisappear {
+            // Lock the app when the window is closed
+            appState.isAppUnlocked = false
+        }
     }
 }
 
@@ -48,6 +55,45 @@ struct MainAppView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("NavigateToSettings"))) { _ in
             appState.selectedNavItem = .settings
+        }
+    }
+}
+
+/// A view shown when the app dashboard is locked, prompting for system authentication.
+struct AppLockedView: View {
+    @EnvironmentObject var appState: AppState
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "lock.shield.fill")
+                .font(.system(size: 60))
+                .foregroundColor(.blue)
+            Text("AppLock Pro is locked")
+                .font(.title2)
+                .fontWeight(.medium)
+            Text("Please authenticate to access your dashboard and settings.")
+                .font(.body)
+                .foregroundColor(.secondary)
+            
+            Button("Unlock") {
+                authenticate()
+            }
+            .buttonStyle(.borderedProminent)
+            .padding(.top, 10)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onAppear {
+            authenticate()
+        }
+    }
+    
+    private func authenticate() {
+        AuthOverlayWindowController.shared.show(for: "AppLock Pro") { success in
+            if success {
+                DispatchQueue.main.async {
+                    appState.isAppUnlocked = true
+                }
+            }
         }
     }
 }

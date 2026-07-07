@@ -1,0 +1,13 @@
+[2026-07-07 09:00:45 +0000] Auth Similarity: 0.8458184 vs threshold: 0.55
+[2026-07-07 09:00:49 +0000] Protected app activated: com.apple.calculator. Requiring auth.
+[2026-07-07 09:00:50 +0000] Already authenticating com.apple.calculator via activation, skipping launch handler.
+[2026-07-07 09:00:52 +0000] Auth Similarity: 0.7946535 vs threshold: 0.55
+[2026-07-07 09:00:52 +0000] Activation auth success for com.apple.calculator
+[2026-07-07 09:00:52 +0000] Marked com.apple.calculator as authenticated at 2026-07-07 09:00:52 +0000
+[2026-07-07 09:00:54 +0000] Protected app terminated: com.apple.calculator. Clearing auth timestamp.
+[2026-07-07 09:00:56 +0000] Protected app activated: com.apple.calculator. Requiring auth.
+[2026-07-07 09:00:56 +0000] Already authenticating com.apple.calculator via activation, skipping launch handler.
+[2026-07-07 09:00:58 +0000] Auth Similarity: 0.0006651506 vs threshold: 0.55
+[2026-07-07 09:00:58 +0000] handleFailure called: Face not recognized (Score: 0.00)
+[2026-07-07 09:00:59 +0000] Protected app terminated: com.apple.calculator. Clearing auth timestamp.
+[2026-07-07 09:01:03 +0000] Activation auth failure for com.apple.calculator. Keeping hidden.

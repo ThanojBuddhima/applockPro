@@ -68,7 +68,7 @@ final class FaceDetectorService: ObservableObject {
             DispatchQueue.main.async {
                 self.currentFace = result
                 
-                if quality < 0.3 {
+                if quality < 0.5 {
                     self.instruction = "Improve lighting or hold still"
                 } else if faceObs.boundingBox.width < 0.2 {
                     self.instruction = "Move closer"

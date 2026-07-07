@@ -17,7 +17,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func setupMenuBar() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem?.button {
-            button.image = NSImage(systemSymbolName: "lock.shield.fill", accessibilityDescription: "AppLock Pro")
+            let config = NSImage.SymbolConfiguration(pointSize: 15, weight: .regular)
+            if let image = NSImage(systemSymbolName: "lock.shield.fill", accessibilityDescription: "AppLock Pro")?.withSymbolConfiguration(config) {
+                image.isTemplate = true
+                button.image = image
+            }
         }
         
         let menu = NSMenu()

@@ -18,6 +18,8 @@ class AuthOverlayViewModel: ObservableObject {
     
     private var cancellables = Set<AnyCancellable>()
     private var isVerifying = false
+    private var framesSinceStart = 0
+    private let warmupFrameCount = 10 // Skip first ~10 frames to let camera warm up
     
     var onAuthResult: ((Bool) -> Void)?
     
@@ -39,6 +41,7 @@ class AuthOverlayViewModel: ObservableObject {
     func start() {
         isVerifying = false
         sessionFailures = 0
+        framesSinceStart = 0
         authState = .scanning
         statusMessage = "Scanning face..."
         cameraService.start()
@@ -52,6 +55,13 @@ class AuthOverlayViewModel: ObservableObject {
     
     private func handleFaceResult(_ result: FaceDetectionResult?) {
         guard !isVerifying, authState == .scanning, let result = result else { return }
+        
+        // Camera warm-up: skip early frames that may produce blurry/overexposed images
+        framesSinceStart += 1
+        if framesSinceStart < warmupFrameCount {
+            statusMessage = "Initializing camera..."
+            return
+        }
         
         // Wait for a good quality face
         if result.quality > 0.4, let _ = result.pixelBuffer {
@@ -83,12 +93,30 @@ class AuthOverlayViewModel: ObservableObject {
             let similarity = FaceRecognitionService.shared.computeCosineSimilarity(embeddingA: enrolledEmbedding, embeddingB: currentEmbedding)
             
             NSLog("Auth Similarity: %f", similarity)
+            self.logToFile("Auth Similarity: \(similarity) vs threshold: \(FaceRecognitionService.shared.similarityThreshold)")
             
             if similarity >= FaceRecognitionService.shared.similarityThreshold {
                 self.handleSuccess()
             } else {
                 let formattedSim = String(format: "%.2f", similarity)
                 self.handleFailure(message: "Face not recognized (Score: \(formattedSim))")
+            }
+        }
+    }
+    
+    private func logToFile(_ message: String) {
+        print(message)
+        let logFileURL = URL(fileURLWithPath: "/Users/thanojbuddhima/Development/applockPro/app_logs.txt")
+        let logMessage = "[\(Date())] \(message)\n"
+        if let data = logMessage.data(using: .utf8) {
+            if FileManager.default.fileExists(atPath: logFileURL.path) {
+                if let fileHandle = try? FileHandle(forWritingTo: logFileURL) {
+                    fileHandle.seekToEndOfFile()
+                    fileHandle.write(data)
+                    fileHandle.closeFile()
+                }
+            } else {
+                try? data.write(to: logFileURL)
             }
         }
     }
@@ -108,6 +136,7 @@ class AuthOverlayViewModel: ObservableObject {
     }
     
     private func handleFailure(message: String) {
+        logToFile("handleFailure called: \(message)")
         StatsManager.shared.recordFailure()
         sessionFailures += 1
         

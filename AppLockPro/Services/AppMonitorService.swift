@@ -1,81 +1,140 @@
 import Foundation
 import AppKit
 import Combine
+import SwiftUI
 
-/// Monitors application launches and hides protected applications until authenticated.
+/// Monitors application launches and hides/suspends protected applications until authenticated.
 class AppMonitorService {
     static let shared = AppMonitorService()
     
     private var cancellables = Set<AnyCancellable>()
     
-    // Apps that have been successfully authenticated and are allowed to launch
-    private var recentlyAuthenticatedApps: Set<String> = []
+    /// Per-app authentication timestamps — tracks when each app was last authenticated
+    private var appAuthTimestamps: [String: Date] = [:]
+    
+    /// Guard to prevent simultaneous auth windows
+    private var currentlyAuthenticatingBundleId: String? = nil
     
     private init() {}
     
-    /// Starts observing NSWorkspace notifications.
+    private func logToFile(_ message: String) {
+        print(message)
+        let logFileURL = URL(fileURLWithPath: "/Users/thanojbuddhima/Development/applockPro/app_logs.txt")
+        let logMessage = "[\(Date())] \(message)\n"
+        if let data = logMessage.data(using: .utf8) {
+            if FileManager.default.fileExists(atPath: logFileURL.path) {
+                if let fileHandle = try? FileHandle(forWritingTo: logFileURL) {
+                    fileHandle.seekToEndOfFile()
+                    fileHandle.write(data)
+                    fileHandle.closeFile()
+                }
+            } else {
+                try? data.write(to: logFileURL)
+            }
+        }
+    }
+    
+    /// Marks an app as authenticated right now.
+    private func markAppAuthenticated(bundleId: String) {
+        appAuthTimestamps[bundleId] = Date()
+        logToFile("Marked \(bundleId) as authenticated at \(Date())")
+    }
+    
+    // MARK: - Process Suspension Helpers
+    
+    private func suspendProcess(pid: pid_t) {
+        kill(pid, SIGSTOP)
+        logToFile("Suspended process PID: \(pid)")
+    }
+    
+    private func resumeProcess(pid: pid_t) {
+        kill(pid, SIGCONT)
+        logToFile("Resumed process PID: \(pid)")
+    }
+    
+    // MARK: - Start Monitoring
+    
     func startMonitoring() {
-        print("Starting AppMonitorService...")
+        logToFile("Starting AppMonitorService (with SIGSTOP locking)...")
+        
+        // 1. Intercept fresh app launches
         NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didLaunchApplicationNotification)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] notification in
-                self?.handleAppLaunch(notification: notification)
+                self?.handleAppEvent(notification: notification, eventType: "Launch")
+            }
+            .store(in: &cancellables)
+        
+        // 2. Intercept app terminations — clear per-app auth
+        NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didTerminateApplicationNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+                      let bundleId = app.bundleIdentifier else { return }
+                
+                if AppManager.shared.isAppProtected(bundleIdentifier: bundleId) {
+                    self?.logToFile("Protected app terminated: \(bundleId). Clearing auth timestamp.")
+                    self?.appAuthTimestamps.removeValue(forKey: bundleId)
+                }
+            }
+            .store(in: &cancellables)
+        
+        // 3. Intercept app activations (app comes to foreground — including reopen from dock)
+        NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didActivateApplicationNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                self?.handleAppEvent(notification: notification, eventType: "Activation")
             }
             .store(in: &cancellables)
     }
     
-    private func handleAppLaunch(notification: Notification) {
+    // MARK: - Shared Event Handler (Launch & Activation)
+    
+    private func handleAppEvent(notification: Notification, eventType: String) {
         guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
               let bundleId = app.bundleIdentifier else { return }
         
         // Skip ourselves
         if bundleId == Bundle.main.bundleIdentifier { return }
         
-        // If we recently authenticated this app and relaunched it, allow it to pass and remove it from the bypass list
-        if recentlyAuthenticatedApps.contains(bundleId) {
-            print("Allowing authenticated app to launch: \(bundleId)")
-            recentlyAuthenticatedApps.remove(bundleId)
+        // If we're already showing an auth window for this app, don't fire again
+        if currentlyAuthenticatingBundleId == bundleId { return }
+        
+        // Grace period: ignore events that happen within 3 seconds of a successful auth.
+        // This prevents infinite loops when we call `app.activate()` after auth success.
+        if let lastAuth = appAuthTimestamps[bundleId], Date().timeIntervalSince(lastAuth) < 3.0 {
+            logToFile("Ignoring \(eventType) for \(bundleId) - within 3s grace period.")
             return
         }
         
-        // If there's an active global session, bypass Face ID
-        if SessionManager.shared.isSessionActive {
-            print("Global session active. Allowing app to launch: \(bundleId)")
-            return
-        }
-        
-        // Check if the app is protected
         if AppManager.shared.isAppProtected(bundleIdentifier: bundleId) {
-            print("Protected app launched: \(bundleId). Terminating it...")
+            logToFile("Protected app event (\(eventType)): \(bundleId). Locking app...")
             
-            // Capture the URL so we can relaunch it
-            let appURL = app.bundleURL
             let appName = app.localizedName ?? "App"
             
-            // Option B: Terminate the application immediately.
-            // forceTerminate() is more aggressive and ensures the app dies before it can render its windows.
-            app.forceTerminate()
+            // 1. Hide the window so it disappears from screen
+            app.hide()
             
-            // Present authentication overlay
-            showAuthenticationOverlay(for: bundleId, appName: appName, appURL: appURL)
-        }
-    }
-    
-    private func showAuthenticationOverlay(for bundleId: String, appName: String, appURL: URL?) {
-        AuthOverlayWindowController.shared.show(for: appName) { [weak self] success in
-            if success {
-                print("Authentication success for \(bundleId)")
-                if let url = appURL {
-                    // Mark this app as authenticated so we don't block it again when we relaunch it
-                    self?.recentlyAuthenticatedApps.insert(bundleId)
+            // 2. Suspend the process so it literally stops running in the background
+            suspendProcess(pid: app.processIdentifier)
+            
+            currentlyAuthenticatingBundleId = bundleId
+            
+            AuthOverlayWindowController.shared.show(for: appName) { [weak self] success in
+                self?.currentlyAuthenticatingBundleId = nil
+                
+                if success {
+                    self?.logToFile("\(eventType) auth success for \(bundleId)")
+                    self?.markAppAuthenticated(bundleId: bundleId)
                     
-                    // Relaunch the app since they passed authentication
-                    let configuration = NSWorkspace.OpenConfiguration()
-                    NSWorkspace.shared.openApplication(at: url, configuration: configuration, completionHandler: nil)
+                    // Unfreeze and show
+                    self?.resumeProcess(pid: app.processIdentifier)
+                    app.unhide()
+                    app.activate()
+                } else {
+                    self?.logToFile("\(eventType) auth failure for \(bundleId). Keeping suspended and hidden.")
+                    // Leave it suspended. The process is completely frozen.
                 }
-            } else {
-                print("Authentication failure or cancelled for \(bundleId).")
-                // App is already terminated, so we do nothing.
             }
         }
     }
