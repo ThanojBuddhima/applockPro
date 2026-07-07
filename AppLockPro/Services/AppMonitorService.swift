@@ -13,9 +13,26 @@ class AppMonitorService {
     
     private init() {}
     
+    private func logToFile(_ message: String) {
+        print(message)
+        let logFileURL = URL(fileURLWithPath: "/Users/thanojbuddhima/Development/applockPro/app_logs.txt")
+        let logMessage = "[\(Date())] \(message)\n"
+        if let data = logMessage.data(using: .utf8) {
+            if FileManager.default.fileExists(atPath: logFileURL.path) {
+                if let fileHandle = try? FileHandle(forWritingTo: logFileURL) {
+                    fileHandle.seekToEndOfFile()
+                    fileHandle.write(data)
+                    fileHandle.closeFile()
+                }
+            } else {
+                try? data.write(to: logFileURL)
+            }
+        }
+    }
+    
     /// Starts observing NSWorkspace notifications.
     func startMonitoring() {
-        print("Starting AppMonitorService...")
+        logToFile("Starting AppMonitorService...")
         NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didLaunchApplicationNotification)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] notification in
@@ -33,20 +50,20 @@ class AppMonitorService {
         
         // If we recently authenticated this app and relaunched it, allow it to pass and remove it from the bypass list
         if recentlyAuthenticatedApps.contains(bundleId) {
-            print("Allowing authenticated app to launch: \(bundleId)")
+            logToFile("Allowing authenticated app to launch: \(bundleId)")
             recentlyAuthenticatedApps.remove(bundleId)
             return
         }
         
         // If there's an active global session, bypass Face ID
         if SessionManager.shared.isSessionActive {
-            print("Global session active. Allowing app to launch: \(bundleId)")
+            logToFile("Global session active. Allowing app to launch: \(bundleId)")
             return
         }
         
         // Check if the app is protected
         if AppManager.shared.isAppProtected(bundleIdentifier: bundleId) {
-            print("Protected app launched: \(bundleId). Terminating it...")
+            logToFile("Protected app launched: \(bundleId). Terminating it...")
             
             // Capture the URL so we can relaunch it
             let appURL = app.bundleURL
@@ -64,7 +81,7 @@ class AppMonitorService {
     private func showAuthenticationOverlay(for bundleId: String, appName: String, appURL: URL?) {
         AuthOverlayWindowController.shared.show(for: appName) { [weak self] success in
             if success {
-                print("Authentication success for \(bundleId)")
+                self?.logToFile("Authentication success for \(bundleId)")
                 if let url = appURL {
                     // Mark this app as authenticated so we don't block it again when we relaunch it
                     self?.recentlyAuthenticatedApps.insert(bundleId)
@@ -77,15 +94,15 @@ class AppMonitorService {
                         configuration.createsNewApplicationInstance = false
                         NSWorkspace.shared.openApplication(at: url, configuration: configuration) { app, error in
                             if let error = error {
-                                print("Error relaunching app \(bundleId): \(error)")
+                                self?.logToFile("Error relaunching app \(bundleId): \(error)")
                             } else {
-                                print("Successfully relaunched \(bundleId)")
+                                self?.logToFile("Successfully relaunched \(bundleId)")
                             }
                         }
                     }
                 }
             } else {
-                print("Authentication failure or cancelled for \(bundleId).")
+                self?.logToFile("Authentication failure or cancelled for \(bundleId).")
                 // App is already terminated, so we do nothing.
             }
         }
