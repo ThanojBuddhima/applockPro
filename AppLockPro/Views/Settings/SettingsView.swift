@@ -83,24 +83,44 @@ struct SettingsView: View {
     }
 }
 
-// MARK: - Settings Sections
+import ServiceManagement
 
 struct GeneralSettingsSection: View {
-    @State private var launchAtStartup = false
-    @State private var startMinimized = false
+    @AppStorage("launchAtLogin") private var launchAtStartup = false
+    @AppStorage("hideDockIcon") private var hideDockIcon = false
+    @AppStorage("appTheme") private var appTheme: String = "system"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             settingsGroup(title: "Startup") {
                 Toggle("Launch FaceLock Pro at login", isOn: $launchAtStartup)
-                Toggle("Start minimized to menu bar", isOn: $startMinimized)
+                    .onChange(of: launchAtStartup) { _, newValue in
+                        do {
+                            if newValue {
+                                try SMAppService.mainApp.register()
+                            } else {
+                                try SMAppService.mainApp.unregister()
+                            }
+                        } catch {
+                            print("Failed to update Launch at Login: \(error)")
+                        }
+                    }
+                Toggle("Hide Dock Icon (Run in Menu Bar)", isOn: $hideDockIcon)
+                    .onChange(of: hideDockIcon) { _, newValue in
+                        if newValue {
+                            NSApp.setActivationPolicy(.accessory)
+                        } else {
+                            NSApp.setActivationPolicy(.regular)
+                            NSApp.activate(ignoringOtherApps: true)
+                        }
+                    }
             }
 
             settingsGroup(title: "Appearance") {
                 HStack {
                     Text("Theme")
                     Spacer()
-                    Picker("", selection: .constant("system")) {
+                    Picker("", selection: $appTheme) {
                         Text("System").tag("system")
                         Text("Light").tag("light")
                         Text("Dark").tag("dark")
@@ -114,14 +134,22 @@ struct GeneralSettingsSection: View {
 }
 
 struct SecuritySettingsSection: View {
-    @State private var faceUnlock = true
-    @State private var touchID = true
-    @State private var macPassword = true
-    @State private var pin = false
-    @State private var confidenceThreshold: Double = 0.55
-    @State private var maxAttempts = 5
-    @State private var lockAfterSleep = true
-    @State private var sessionTimeout: AppSettings.SessionTimeout = .thirtyMinutes
+    @AppStorage("faceUnlockEnabled") private var faceUnlock = true
+    @AppStorage("touchIDEnabled") private var touchID = true
+    @AppStorage("macPasswordEnabled") private var macPassword = true
+    
+    @AppStorage("maxFailedAttempts") private var maxAttempts = 5
+    @AppStorage("lockAfterSleep") private var lockAfterSleep = true
+    
+    // For Enum in AppStorage, we must store the RawValue (String)
+    @AppStorage("sessionTimeout") private var sessionTimeoutRaw = AppSettings.SessionTimeout.thirtyMinutes.rawValue
+    
+    private var sessionTimeout: Binding<AppSettings.SessionTimeout> {
+        Binding(
+            get: { AppSettings.SessionTimeout(rawValue: sessionTimeoutRaw) ?? .thirtyMinutes },
+            set: { sessionTimeoutRaw = $0.rawValue }
+        )
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -129,23 +157,6 @@ struct SecuritySettingsSection: View {
                 Toggle("Face Unlock", isOn: $faceUnlock)
                 Toggle("Touch ID", isOn: $touchID)
                 Toggle("macOS Password", isOn: $macPassword)
-                Toggle("Application PIN", isOn: $pin)
-            }
-
-            settingsGroup(title: "Face Recognition") {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("Confidence Threshold")
-                        Spacer()
-                        Text(String(format: "%.0f%%", confidenceThreshold * 100))
-                            .monospacedDigit()
-                            .foregroundStyle(.secondary)
-                    }
-                    Slider(value: $confidenceThreshold, in: 0.3...0.9, step: 0.05)
-                    Text("Higher values are more secure but may reject valid users.")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
             }
 
             settingsGroup(title: "Auto Lock") {
@@ -153,7 +164,7 @@ struct SecuritySettingsSection: View {
                 HStack {
                     Text("Session timeout")
                     Spacer()
-                    Picker("", selection: $sessionTimeout) {
+                    Picker("", selection: sessionTimeout) {
                         ForEach(AppSettings.SessionTimeout.allCases) { timeout in
                             Text(timeout.rawValue).tag(timeout)
                         }
@@ -169,8 +180,13 @@ struct SecuritySettingsSection: View {
     }
 }
 
+import AVFoundation
+
 struct CameraSettingsSection: View {
-    @State private var livenessEnabled = true
+    @AppStorage("livenessEnabled") private var livenessEnabled = true
+    @AppStorage("selectedCameraID") private var selectedCameraID = "default"
+    
+    @State private var availableCameras: [AVCaptureDevice] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -178,8 +194,11 @@ struct CameraSettingsSection: View {
                 HStack {
                     Text("Selected Camera")
                     Spacer()
-                    Picker("", selection: .constant("default")) {
-                        Text("FaceTime HD Camera").tag("default")
+                    Picker("", selection: $selectedCameraID) {
+                        Text("Default Camera").tag("default")
+                        ForEach(availableCameras, id: \.uniqueID) { camera in
+                            Text(camera.localizedName).tag(camera.uniqueID)
+                        }
                     }
                     .frame(width: 250)
                 }
@@ -192,31 +211,25 @@ struct CameraSettingsSection: View {
                     .foregroundStyle(.tertiary)
             }
         }
+        .onAppear {
+            let session = AVCaptureDevice.DiscoverySession(
+                deviceTypes: [.builtInWideAngleCamera, .external],
+                mediaType: .video,
+                position: .unspecified
+            )
+            self.availableCameras = session.devices
+        }
     }
 }
 
 struct PrivacySettingsSection: View {
-    @State private var showingClearConfirmation = false
+    @EnvironmentObject var appState: AppState
     @State private var showingDeleteConfirmation = false
+    @State private var showingResetConfirmation = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             settingsGroup(title: "Data Management") {
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("Clear Activity Logs")
-                        Text("Remove all authentication history")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Button("Clear Logs") {
-                        showingClearConfirmation = true
-                    }
-                    .buttonStyle(.bordered)
-                }
-
-                Divider()
 
                 HStack {
                     VStack(alignment: .leading) {
@@ -228,6 +241,23 @@ struct PrivacySettingsSection: View {
                     Spacer()
                     Button("Delete") {
                         showingDeleteConfirmation = true
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.red)
+                }
+                
+                Divider()
+                
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Reset App State")
+                        Text("Reset all settings and replay the welcome wizard")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button("Reset App") {
+                        showingResetConfirmation = true
                     }
                     .buttonStyle(.bordered)
                     .tint(.red)
@@ -249,17 +279,34 @@ struct PrivacySettingsSection: View {
                 }
             }
         }
-        .alert("Clear Activity Logs?", isPresented: $showingClearConfirmation) {
-            Button("Cancel", role: .cancel) {}
-            Button("Clear All", role: .destructive) {}
-        } message: {
-            Text("This will permanently delete all authentication history. This action cannot be undone.")
-        }
         .alert("Delete Face Data?", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {}
+            Button("Delete", role: .destructive) {
+                UserDefaults.standard.removeObject(forKey: "faceEmbedding")
+                UserDefaults.standard.set(false, forKey: "isEnrolled")
+                withAnimation {
+                    appState.isEnrolled = false
+                }
+            }
         } message: {
             Text("This will remove your enrolled face data. You will need to re-enroll to use Face Unlock.")
+        }
+        .alert("Reset App State?", isPresented: $showingResetConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Reset Everything", role: .destructive) {
+                // Clear all UserDefaults
+                if let bundleID = Bundle.main.bundleIdentifier {
+                    UserDefaults.standard.removePersistentDomain(forName: bundleID)
+                    UserDefaults.standard.synchronize()
+                }
+                // Update AppState to trigger SwiftUI to show the Welcome wizard
+                withAnimation {
+                    appState.isEnrolled = false
+                    appState.onboardingCompleted = false
+                }
+            }
+        } message: {
+            Text("This will clear all permissions, settings, and face data, and restart the onboarding wizard.")
         }
     }
 }

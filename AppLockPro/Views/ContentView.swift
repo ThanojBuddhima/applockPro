@@ -32,8 +32,6 @@ struct MainAppView: View {
                     ProtectedAppsView()
                 case .enrollment:
                     EnrollmentWizardView()
-                case .history:
-                    ActivityHistoryView()
                 case .settings:
                     SettingsView()
                 case .about:

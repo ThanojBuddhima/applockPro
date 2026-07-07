@@ -97,9 +97,6 @@ struct DashboardView: View {
                 QuickActionButton(title: "Re-Enroll Face", icon: "faceid", color: .orange) {
                     appState.selectedNavItem = .enrollment
                 }
-                QuickActionButton(title: "View History", icon: "clock.arrow.circlepath", color: .purple) {
-                    appState.selectedNavItem = .history
-                }
                 QuickActionButton(title: "Settings", icon: "gearshape", color: .gray) {
                     appState.selectedNavItem = .settings
                 }
@@ -114,12 +111,6 @@ struct DashboardView: View {
                     .font(.headline)
 
                 Spacer()
-
-                Button("View All") {
-                    appState.selectedNavItem = .history
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.tint)
             }
 
             // Placeholder

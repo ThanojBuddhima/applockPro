@@ -9,7 +9,10 @@ class FaceRecognitionService {
     static let shared = FaceRecognitionService()
     
     // Configurable threshold for matching faces (ArcFace usually uses around 0.5 - 0.6)
-    let similarityThreshold: Float = 0.55
+    var similarityThreshold: Float {
+        let stored = UserDefaults.standard.double(forKey: "confidenceThreshold")
+        return stored > 0 ? Float(stored) : 0.55
+    }
     
     private var visionModel: VNCoreMLModel?
     

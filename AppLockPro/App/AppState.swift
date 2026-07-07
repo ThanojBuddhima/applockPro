@@ -20,7 +20,6 @@ enum NavigationItem: String, CaseIterable, Identifiable {
     case dashboard = "Dashboard"
     case protectedApps = "Protected Apps"
     case enrollment = "Face Enrollment"
-    case history = "Activity History"
     case settings = "Settings"
     case about = "About"
 
@@ -31,7 +30,6 @@ enum NavigationItem: String, CaseIterable, Identifiable {
         case .dashboard:      return "gauge.with.dots.needle.33percent"
         case .protectedApps:  return "lock.shield"
         case .enrollment:     return "faceid"
-        case .history:        return "clock.arrow.circlepath"
         case .settings:       return "gearshape"
         case .about:          return "info.circle"
         }

@@ -2,11 +2,50 @@ import AppKit
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    
+    var statusItem: NSStatusItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         print("[AppLockPro] Application launched successfully.")
         // Start monitoring for application launches (App Blocking)
         AppMonitorService.shared.startMonitoring()
+        
+        setupMenuBar()
+        updateDockVisibility()
+    }
+    
+    func setupMenuBar() {
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        if let button = statusItem?.button {
+            button.image = NSImage(systemSymbolName: "lock.shield.fill", accessibilityDescription: "FaceLock Pro")
+        }
+        
+        let menu = NSMenu()
+        menu.addItem(NSMenuItem(title: "Show FaceLock Pro", action: #selector(showMainWindow), keyEquivalent: "s"))
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        
+        statusItem?.menu = menu
+    }
+    
+    @objc func showMainWindow() {
+        NSApp.activate(ignoringOtherApps: true)
+        for window in NSApp.windows {
+            // Find the main SwiftUI window and bring it to front
+            if window.className == "SwiftUI.AppKitWindow" {
+                window.makeKeyAndOrderFront(nil)
+                return
+            }
+        }
+    }
+    
+    func updateDockVisibility() {
+        let hideDockIcon = UserDefaults.standard.bool(forKey: "hideDockIcon")
+        if hideDockIcon {
+            NSApp.setActivationPolicy(.accessory)
+        } else {
+            NSApp.setActivationPolicy(.regular)
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
