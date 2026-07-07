@@ -13,6 +13,9 @@ class AppState: ObservableObject {
 
     /// The currently selected sidebar navigation item.
     @Published var selectedNavItem: NavigationItem? = .dashboard
+
+    /// Whether the main app window is unlocked via System Auth
+    @Published var isAppUnlocked: Bool = false
 }
 
 /// Represents a navigation destination in the sidebar.
