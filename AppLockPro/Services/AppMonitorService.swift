@@ -70,8 +70,19 @@ class AppMonitorService {
                     self?.recentlyAuthenticatedApps.insert(bundleId)
                     
                     // Relaunch the app since they passed authentication
-                    let configuration = NSWorkspace.OpenConfiguration()
-                    NSWorkspace.shared.openApplication(at: url, configuration: configuration, completionHandler: nil)
+                    // Add a small delay because forceTerminate() is asynchronous and macOS might 
+                    // ignore the launch request if it thinks the app is still shutting down.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        let configuration = NSWorkspace.OpenConfiguration()
+                        configuration.createsNewApplicationInstance = false
+                        NSWorkspace.shared.openApplication(at: url, configuration: configuration) { app, error in
+                            if let error = error {
+                                print("Error relaunching app \(bundleId): \(error)")
+                            } else {
+                                print("Successfully relaunched \(bundleId)")
+                            }
+                        }
+                    }
                 }
             } else {
                 print("Authentication failure or cancelled for \(bundleId).")
