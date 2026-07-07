@@ -47,7 +47,7 @@ class AuthOverlayViewModel: ObservableObject {
         guard !isVerifying, authState == .scanning, let result = result else { return }
         
         // Wait for a good quality face
-        if result.quality > 0.4, let buffer = result.pixelBuffer {
+        if result.quality > 0.4, let _ = result.pixelBuffer {
             isVerifying = true
             authState = .verifying
             statusMessage = "Verifying..."
@@ -55,12 +55,13 @@ class AuthOverlayViewModel: ObservableObject {
             // Stop scanning to prevent multiple verifications
             faceDetector.stopProcessing()
             
-            verifyFace(buffer: buffer)
+            verifyFace(result: result)
         }
     }
     
-    private func verifyFace(buffer: CVPixelBuffer) {
-        FaceRecognitionService.shared.generateEmbedding(from: buffer) { [weak self] currentEmbedding in
+    private func verifyFace(result: FaceDetectionResult) {
+        guard let buffer = result.pixelBuffer else { return }
+        FaceRecognitionService.shared.generateEmbedding(from: buffer, faceRect: result.boundingBox) { [weak self] currentEmbedding in
             guard let self = self, let currentEmbedding = currentEmbedding else {
                 self?.handleFailure(message: "Failed to read face features.")
                 return
@@ -74,12 +75,13 @@ class AuthOverlayViewModel: ObservableObject {
             
             let similarity = FaceRecognitionService.shared.computeCosineSimilarity(embeddingA: enrolledEmbedding, embeddingB: currentEmbedding)
             
-            print("Auth Similarity: \(similarity)")
+            NSLog("Auth Similarity: %f", similarity)
             
             if similarity >= FaceRecognitionService.shared.similarityThreshold {
                 self.handleSuccess()
             } else {
-                self.handleFailure(message: "Face not recognized.")
+                let formattedSim = String(format: "%.2f", similarity)
+                self.handleFailure(message: "Face not recognized (Score: \(formattedSim))")
             }
         }
     }
