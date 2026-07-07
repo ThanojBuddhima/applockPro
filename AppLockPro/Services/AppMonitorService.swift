@@ -39,6 +39,19 @@ class AppMonitorService {
                 self?.handleAppLaunch(notification: notification)
             }
             .store(in: &cancellables)
+            
+        NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didTerminateApplicationNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+                      let bundleId = app.bundleIdentifier else { return }
+                
+                if AppManager.shared.isAppProtected(bundleIdentifier: bundleId) {
+                    self?.logToFile("Protected app terminated: \(bundleId). Invalidating global session.")
+                    SessionManager.shared.invalidateSession()
+                }
+            }
+            .store(in: &cancellables)
     }
     
     private func handleAppLaunch(notification: Notification) {

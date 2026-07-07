@@ -20,3 +20,45 @@
 [2026-07-07 07:46:08 +0000] Allowing authenticated app to launch: com.apple.calculator
 [2026-07-07 07:49:25 +0000] Starting AppMonitorService...
 [2026-07-07 07:49:38 +0000] Auth Similarity: 0.7683822 vs threshold: 0.55
+[2026-07-07 07:53:14 +0000] Starting AppMonitorService...
+[2026-07-07 07:53:33 +0000] Auth Similarity: 0.6453559 vs threshold: 0.55
+[2026-07-07 07:53:38 +0000] Protected app launched: com.apple.calculator. Terminating it...
+[2026-07-07 07:53:39 +0000] Auth Similarity: 0.758916 vs threshold: 0.55
+[2026-07-07 07:53:40 +0000] Authentication success for com.apple.calculator
+[2026-07-07 07:53:41 +0000] Successfully relaunched com.apple.calculator
+[2026-07-07 07:53:41 +0000] Allowing authenticated app to launch: com.apple.calculator
+[2026-07-07 07:53:50 +0000] Auth Similarity: 0.69600046 vs threshold: 0.55
+[2026-07-07 07:53:56 +0000] Auth Similarity: 0.7383594 vs threshold: 0.55
+[2026-07-07 07:54:34 +0000] Protected app launched: com.apple.calculator. Terminating it...
+[2026-07-07 07:54:36 +0000] Auth Similarity: 0.7941674 vs threshold: 0.55
+[2026-07-07 07:54:36 +0000] Authentication success for com.apple.calculator
+[2026-07-07 07:54:37 +0000] Successfully relaunched com.apple.calculator
+[2026-07-07 07:54:37 +0000] Allowing authenticated app to launch: com.apple.calculator
+[2026-07-07 07:54:41 +0000] Protected app launched: net.whatsapp.WhatsApp. Terminating it...
+[2026-07-07 07:54:43 +0000] Auth Similarity: 0.8852558 vs threshold: 0.55
+[2026-07-07 07:54:43 +0000] Authentication success for net.whatsapp.WhatsApp
+[2026-07-07 07:54:44 +0000] Successfully relaunched net.whatsapp.WhatsApp
+[2026-07-07 07:54:45 +0000] Allowing authenticated app to launch: net.whatsapp.WhatsApp
+[2026-07-07 07:55:14 +0000] Protected app launched: com.apple.mail. Terminating it...
+[2026-07-07 07:55:16 +0000] Auth Similarity: 0.753971 vs threshold: 0.55
+[2026-07-07 07:55:17 +0000] Authentication success for com.apple.mail
+[2026-07-07 07:55:17 +0000] Successfully relaunched com.apple.mail
+[2026-07-07 07:55:17 +0000] Allowing authenticated app to launch: com.apple.mail
+[2026-07-07 07:56:40 +0000] Auth Similarity: 0.8106009 vs threshold: 0.55
+[2026-07-07 07:57:12 +0000] Protected app launched: com.spotify.client. Terminating it...
+[2026-07-07 07:57:14 +0000] Auth Similarity: 0.695044 vs threshold: 0.55
+[2026-07-07 07:57:14 +0000] Authentication success for com.spotify.client
+[2026-07-07 07:57:15 +0000] Successfully relaunched com.spotify.client
+[2026-07-07 07:57:15 +0000] Allowing authenticated app to launch: com.spotify.client
+[2026-07-07 07:57:30 +0000] Protected app launched: com.spotify.client. Terminating it...
+[2026-07-07 07:57:32 +0000] Auth Similarity: 0.585658 vs threshold: 0.55
+[2026-07-07 07:57:32 +0000] Authentication success for com.spotify.client
+[2026-07-07 07:57:33 +0000] Successfully relaunched com.spotify.client
+[2026-07-07 07:57:33 +0000] Allowing authenticated app to launch: com.spotify.client
+[2026-07-07 07:58:22 +0000] Auth Similarity: 0.68523294 vs threshold: 0.55
+[2026-07-07 07:58:28 +0000] Protected app launched: com.apple.calculator. Terminating it...
+[2026-07-07 07:58:30 +0000] Auth Similarity: 0.6816776 vs threshold: 0.55
+[2026-07-07 07:58:30 +0000] Authentication success for com.apple.calculator
+[2026-07-07 07:58:31 +0000] Successfully relaunched com.apple.calculator
+[2026-07-07 07:58:31 +0000] Allowing authenticated app to launch: com.apple.calculator
+[2026-07-07 07:58:48 +0000] Auth Similarity: 0.6881765 vs threshold: 0.55
