@@ -48,6 +48,7 @@ class AuthOverlayWindowController: NSWindowController {
         
         // Ensure we activate our app so the window shows up
         NSApp.activate(ignoringOtherApps: true)
+        
         window?.makeKeyAndOrderFront(nil)
         window?.center()
     }
@@ -114,7 +115,7 @@ struct AuthOverlayView: View {
             viewModel.stop()
         }
         .frame(width: 400, height: 450)
-        .background(VisualEffectView(material: .hudWindow, blendingMode: .behindWindow).ignoresSafeArea())
+        .background(VisualEffectView(material: .popover, blendingMode: .behindWindow).ignoresSafeArea())
         .cornerRadius(16)
         // Add a subtle border or shadow for depth
         .overlay(

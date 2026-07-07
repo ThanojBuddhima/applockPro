@@ -88,7 +88,6 @@ import ServiceManagement
 struct GeneralSettingsSection: View {
     @AppStorage("launchAtLogin") private var launchAtStartup = false
     @AppStorage("hideDockIcon") private var hideDockIcon = false
-    @AppStorage("appTheme") private var appTheme: String = "system"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -114,20 +113,6 @@ struct GeneralSettingsSection: View {
                             NSApp.activate(ignoringOtherApps: true)
                         }
                     }
-            }
-
-            settingsGroup(title: "Appearance") {
-                HStack {
-                    Text("Theme")
-                    Spacer()
-                    Picker("", selection: $appTheme) {
-                        Text("System").tag("system")
-                        Text("Light").tag("light")
-                        Text("Dark").tag("dark")
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(width: 250)
-                }
             }
         }
     }
