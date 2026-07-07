@@ -26,6 +26,7 @@ targets:
       - path: AppLockPro
         excludes:
           - "**/.DS_Store"
+          - "**/*.tar.gz"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.applockpro.facelockpro
