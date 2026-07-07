@@ -99,6 +99,14 @@ class AppMonitorService {
         // If we're already showing an auth window for this app, don't fire again
         if currentlyAuthenticatingBundleId == bundleId { return }
         
+        // Grace period: ignore activations that happen within 3 seconds of a successful auth.
+        // This is crucial because when we successfully authenticate, we call `app.activate()`,
+        // which triggers this exact handler again. Without this, it gets stuck in an infinite loop.
+        if let lastAuth = appAuthTimestamps[bundleId], Date().timeIntervalSince(lastAuth) < 3.0 {
+            logToFile("Ignoring activation for \(bundleId) - within 3s grace period.")
+            return
+        }
+        
         if AppManager.shared.isAppProtected(bundleIdentifier: bundleId) {
             logToFile("Protected app activated: \(bundleId). Requiring auth.")
             
@@ -141,6 +149,12 @@ class AppMonitorService {
         // If we're already showing an auth window for this app (from activation), don't fire again
         if currentlyAuthenticatingBundleId == bundleId {
             logToFile("Already authenticating \(bundleId) via activation, skipping launch handler.")
+            return
+        }
+        
+        // Grace period for launches too, just in case
+        if let lastAuth = appAuthTimestamps[bundleId], Date().timeIntervalSince(lastAuth) < 3.0 {
+            logToFile("Ignoring launch for \(bundleId) - within 3s grace period.")
             return
         }
         

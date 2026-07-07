@@ -1,2 +1,10 @@
-[2026-07-07 08:46:40 +0000] Starting AppMonitorService...
-[2026-07-07 08:46:59 +0000] Auth Similarity: 0.78601897 vs threshold: 0.55
+[2026-07-07 08:51:37 +0000] Auth Similarity: 0.681558 vs threshold: 0.55
+[2026-07-07 08:51:44 +0000] Auth Similarity: 0.7534298 vs threshold: 0.55
+[2026-07-07 08:51:48 +0000] Protected app activated: com.apple.calculator. Requiring auth.
+[2026-07-07 08:51:51 +0000] Auth Similarity: 0.6851192 vs threshold: 0.55
+[2026-07-07 08:51:52 +0000] Activation auth success for com.apple.calculator
+[2026-07-07 08:51:52 +0000] Marked com.apple.calculator as authenticated at 2026-07-07 08:51:52 +0000
+[2026-07-07 08:51:52 +0000] Protected app activated: com.apple.calculator. Requiring auth.
+[2026-07-07 08:51:53 +0000] Auth Similarity: 0.7005952 vs threshold: 0.55
+[2026-07-07 08:51:54 +0000] Activation auth success for com.apple.calculator
+[2026-07-07 08:51:54 +0000] Marked com.apple.calculator as authenticated at 2026-07-07 08:51:54 +0000
