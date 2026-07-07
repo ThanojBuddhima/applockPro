@@ -61,13 +61,12 @@ Then, simply drag **AppLock Pro** into your Applications folder. Since you downl
 
 ### Option 2: Manual Download
 1. Download the latest `AppLockPro.dmg` from the **[Releases](https://github.com/ThanojBuddhima/applockPro/releases)** page.
-2. **Important:** Because this is an indie developer app, macOS may show a warning that the file cannot be verified. To bypass this:
-   - **Right-click** (or Control-click) the downloaded `AppLockPro.dmg` file.
-   - Select **Open** from the menu.
-   - Click **Open** again on the security prompt.
-3. Drag the **AppLock Pro** icon into your **Applications** folder.
-4. **First Launch:** When opening the app for the first time, you may need to repeat the same step:
-   - **Right-click** AppLock Pro in your Applications folder and select **Open**.
+2. **Bypassing macOS Security Warnings:** Because this is an indie developer app, macOS may show a "malware" or "cannot be verified" warning when you try to open the DMG.
+   - **Try this first:** **Right-click** (or Control-click) the downloaded `AppLockPro.dmg` file, select **Open**, and click **Open** again.
+   - **If there is no "Open" button (only "Move to Bin"):** Click **Done**. Open your Mac's **System Settings** > **Privacy & Security**. Scroll down to **Security**, find the message about AppLockPro being blocked, and click **Open Anyway**.
+3. Once the file opens, drag the **AppLock Pro** icon into your **Applications** folder.
+4. **First Launch:** When launching the app for the very first time, you may need to repeat the security step:
+   - **Right-click** AppLock Pro in your Applications folder and select **Open**. (Or use the System Settings method again if needed).
 
 ---
 
