@@ -52,14 +52,6 @@ Everything is processed entirely on your Mac. **No biometric data ever leaves yo
 
 ## 🚀 How to Install
 
-### Option 1: Terminal (Fastest, No Warnings)
-To completely bypass the macOS developer warnings, you can download the app directly via your terminal. Open the **Terminal** app and paste this command:
-```bash
-curl -L -o ~/Downloads/AppLockPro.dmg "https://github.com/ThanojBuddhima/applockPro/releases/latest/download/AppLockPro.dmg" && open ~/Downloads/AppLockPro.dmg
-```
-Then, simply drag **AppLock Pro** into your Applications folder. Since you downloaded it via the terminal, it will open without any security warnings!
-
-### Option 2: Manual Download
 1. Download the latest `AppLockPro.dmg` from the **[Releases](https://github.com/ThanojBuddhima/applockPro/releases)** page.
 2. **Bypassing macOS Security Warnings:** Because this is an indie developer app, macOS may show a "malware" or "cannot be verified" warning when you try to open the DMG.
    - **Try this first:** **Right-click** (or Control-click) the downloaded `AppLockPro.dmg` file, select **Open**, and click **Open** again.
