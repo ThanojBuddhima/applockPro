@@ -80,3 +80,122 @@
 [2026-07-07 07:59:40 +0000] Allowing authenticated app to launch: com.apple.mail
 [2026-07-07 07:59:52 +0000] Protected app terminated: com.apple.calculator. Invalidating global session.
 [2026-07-07 08:02:53 +0000] Auth Similarity: 0.7775767 vs threshold: 0.55
+[2026-07-07 08:03:16 +0000] Starting AppMonitorService...
+[2026-07-07 08:03:29 +0000] Auth Similarity: 0.7463337 vs threshold: 0.55
+[2026-07-07 08:03:35 +0000] Protected app activated: com.apple.calculator. Hiding it for auth...
+[2026-07-07 08:03:36 +0000] Protected app launched: com.apple.calculator. Terminating it...
+[2026-07-07 08:03:36 +0000] Authentication failure or cancelled for com.apple.calculator.
+[2026-07-07 08:03:36 +0000] Protected app terminated: com.apple.calculator. Invalidating global session.
+[2026-07-07 08:03:37 +0000] Auth Similarity: 0.77820253 vs threshold: 0.55
+[2026-07-07 08:03:38 +0000] Authentication success for com.apple.calculator
+[2026-07-07 08:03:39 +0000] Successfully relaunched com.apple.calculator
+[2026-07-07 08:03:39 +0000] Allowing authenticated app to launch: com.apple.calculator
+[2026-07-07 08:03:40 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:03:40 +0000] Protected app activated: com.apple.calculator. Hiding it for auth...
+[2026-07-07 08:03:40 +0000] Authentication failure or cancelled for com.apple.mail.
+[2026-07-07 08:03:41 +0000] Auth Similarity: 0.789288 vs threshold: 0.55
+[2026-07-07 08:03:41 +0000] Authentication success for com.apple.calculator
+[2026-07-07 08:03:42 +0000] Successfully relaunched com.apple.calculator
+[2026-07-07 08:03:43 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:03:44 +0000] Auth Similarity: 0.8560101 vs threshold: 0.55
+[2026-07-07 08:03:45 +0000] Authentication success for com.apple.mail
+[2026-07-07 08:03:45 +0000] Successfully relaunched com.apple.mail
+[2026-07-07 08:03:57 +0000] Protected app activated: com.spotify.client. Hiding it for auth...
+[2026-07-07 08:03:58 +0000] Protected app launched: com.spotify.client. Terminating it...
+[2026-07-07 08:03:58 +0000] Authentication failure or cancelled for com.spotify.client.
+[2026-07-07 08:03:58 +0000] Protected app activated: com.spotify.client. Hiding it for auth...
+[2026-07-07 08:03:58 +0000] Authentication failure or cancelled for com.spotify.client.
+[2026-07-07 08:03:59 +0000] Protected app terminated: com.spotify.client. Invalidating global session.
+[2026-07-07 08:04:34 +0000] Starting AppMonitorService...
+[2026-07-07 08:04:36 +0000] Auth Similarity: 0.8077819 vs threshold: 0.55
+[2026-07-07 08:04:43 +0000] Protected app activated: com.apple.calculator. Hiding it for auth...
+[2026-07-07 08:04:43 +0000] Protected app launched: com.apple.calculator. Terminating it...
+[2026-07-07 08:04:43 +0000] Authentication failure or cancelled for com.apple.calculator.
+[2026-07-07 08:04:43 +0000] Protected app terminated: com.apple.calculator. Invalidating global session.
+[2026-07-07 08:04:44 +0000] Auth Similarity: 0.8120235 vs threshold: 0.55
+[2026-07-07 08:04:45 +0000] Authentication success for com.apple.calculator
+[2026-07-07 08:04:46 +0000] Successfully relaunched com.apple.calculator
+[2026-07-07 08:04:46 +0000] Allowing authenticated app to launch: com.apple.calculator
+[2026-07-07 08:04:50 +0000] Auth Similarity: 0.8188151 vs threshold: 0.55
+[2026-07-07 08:04:54 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:04:55 +0000] Auth Similarity: 0.79651564 vs threshold: 0.55
+[2026-07-07 08:04:56 +0000] Authentication success for com.apple.mail
+[2026-07-07 08:04:56 +0000] Successfully relaunched com.apple.mail
+[2026-07-07 08:05:05 +0000] Protected app activated: com.apple.calculator. Hiding it for auth...
+[2026-07-07 08:05:05 +0000] Protected app terminated: com.apple.mail. Invalidating global session.
+[2026-07-07 08:05:07 +0000] Auth Similarity: 0.70998085 vs threshold: 0.55
+[2026-07-07 08:05:07 +0000] Authentication success for com.apple.calculator
+[2026-07-07 08:05:08 +0000] Successfully relaunched com.apple.calculator
+[2026-07-07 08:05:10 +0000] Protected app terminated: com.apple.calculator. Invalidating global session.
+[2026-07-07 08:05:12 +0000] Protected app activated: net.whatsapp.WhatsApp. Hiding it for auth...
+[2026-07-07 08:05:13 +0000] Protected app launched: net.whatsapp.WhatsApp. Terminating it...
+[2026-07-07 08:05:13 +0000] Authentication failure or cancelled for net.whatsapp.WhatsApp.
+[2026-07-07 08:05:13 +0000] Protected app terminated: net.whatsapp.WhatsApp. Invalidating global session.
+[2026-07-07 08:05:14 +0000] Auth Similarity: 0.6996948 vs threshold: 0.55
+[2026-07-07 08:05:14 +0000] Authentication success for net.whatsapp.WhatsApp
+[2026-07-07 08:05:15 +0000] Successfully relaunched net.whatsapp.WhatsApp
+[2026-07-07 08:05:16 +0000] Allowing authenticated app to launch: net.whatsapp.WhatsApp
+[2026-07-07 08:05:17 +0000] Allowing authenticated app to launch: com.apple.mail
+[2026-07-07 08:05:20 +0000] Protected app activated: net.whatsapp.WhatsApp. Hiding it for auth...
+[2026-07-07 08:05:20 +0000] Protected app terminated: com.apple.mail. Invalidating global session.
+[2026-07-07 08:05:22 +0000] Auth Similarity: 0.75363076 vs threshold: 0.55
+[2026-07-07 08:05:22 +0000] Authentication success for net.whatsapp.WhatsApp
+[2026-07-07 08:05:23 +0000] Successfully relaunched net.whatsapp.WhatsApp
+[2026-07-07 08:05:24 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:05:24 +0000] Protected app launched: com.apple.mail. Terminating it...
+[2026-07-07 08:05:24 +0000] Authentication failure or cancelled for com.apple.mail.
+[2026-07-07 08:05:24 +0000] Protected app terminated: com.apple.mail. Invalidating global session.
+[2026-07-07 08:05:25 +0000] Auth Similarity: 0.6340991 vs threshold: 0.55
+[2026-07-07 08:05:25 +0000] Authentication success for com.apple.mail
+[2026-07-07 08:05:26 +0000] Successfully relaunched com.apple.mail
+[2026-07-07 08:05:26 +0000] Allowing authenticated app to launch: com.apple.mail
+[2026-07-07 08:05:27 +0000] Protected app terminated: com.apple.mail. Invalidating global session.
+[2026-07-07 08:05:29 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:05:29 +0000] Protected app launched: com.apple.mail. Terminating it...
+[2026-07-07 08:05:29 +0000] Authentication failure or cancelled for com.apple.mail.
+[2026-07-07 08:05:29 +0000] Protected app terminated: com.apple.mail. Invalidating global session.
+[2026-07-07 08:05:31 +0000] Auth Similarity: 0.800494 vs threshold: 0.55
+[2026-07-07 08:05:31 +0000] Authentication success for com.apple.mail
+[2026-07-07 08:05:32 +0000] Successfully relaunched com.apple.mail
+[2026-07-07 08:05:32 +0000] Allowing authenticated app to launch: com.apple.mail
+[2026-07-07 08:05:48 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:05:50 +0000] Auth Similarity: 0.60613894 vs threshold: 0.55
+[2026-07-07 08:05:50 +0000] Authentication success for com.apple.mail
+[2026-07-07 08:05:51 +0000] Successfully relaunched com.apple.mail
+[2026-07-07 08:05:55 +0000] Protected app terminated: com.apple.mail. Invalidating global session.
+[2026-07-07 08:05:58 +0000] Allowing authenticated app to launch: com.apple.mail
+[2026-07-07 08:06:01 +0000] Protected app terminated: com.apple.mail. Invalidating global session.
+[2026-07-07 08:06:02 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:06:02 +0000] Protected app launched: com.apple.mail. Terminating it...
+[2026-07-07 08:06:02 +0000] Authentication failure or cancelled for com.apple.mail.
+[2026-07-07 08:06:02 +0000] Protected app terminated: com.apple.mail. Invalidating global session.
+[2026-07-07 08:06:04 +0000] Auth Similarity: 0.8066422 vs threshold: 0.55
+[2026-07-07 08:06:05 +0000] Authentication success for com.apple.mail
+[2026-07-07 08:06:05 +0000] Successfully relaunched com.apple.mail
+[2026-07-07 08:06:05 +0000] Allowing authenticated app to launch: com.apple.mail
+[2026-07-07 08:06:07 +0000] Protected app terminated: com.apple.mail. Invalidating global session.
+[2026-07-07 08:06:09 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:06:09 +0000] Protected app launched: com.apple.mail. Terminating it...
+[2026-07-07 08:06:09 +0000] Authentication failure or cancelled for com.apple.mail.
+[2026-07-07 08:06:09 +0000] Protected app terminated: com.apple.mail. Invalidating global session.
+[2026-07-07 08:06:11 +0000] Auth Similarity: 0.7152613 vs threshold: 0.55
+[2026-07-07 08:06:11 +0000] Authentication success for com.apple.mail
+[2026-07-07 08:06:12 +0000] Successfully relaunched com.apple.mail
+[2026-07-07 08:06:12 +0000] Allowing authenticated app to launch: com.apple.mail
+[2026-07-07 08:06:14 +0000] Protected app terminated: com.apple.mail. Invalidating global session.
+[2026-07-07 08:07:10 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:07:10 +0000] Protected app launched: com.apple.mail. Terminating it...
+[2026-07-07 08:07:10 +0000] Authentication failure or cancelled for com.apple.mail.
+[2026-07-07 08:07:10 +0000] Protected app terminated: com.apple.mail. Invalidating global session.
+[2026-07-07 08:07:12 +0000] Auth Similarity: 0.8210108 vs threshold: 0.55
+[2026-07-07 08:07:13 +0000] Authentication success for com.apple.mail
+[2026-07-07 08:07:13 +0000] Successfully relaunched com.apple.mail
+[2026-07-07 08:07:14 +0000] Allowing authenticated app to launch: com.apple.mail
+[2026-07-07 08:07:20 +0000] Auth Similarity: 0.7311271 vs threshold: 0.55
+[2026-07-07 08:07:27 +0000] Auth Similarity: 0.8113191 vs threshold: 0.55
+[2026-07-07 08:07:30 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:07:30 +0000] Auth Similarity: 0.7984736 vs threshold: 0.55
+[2026-07-07 08:07:31 +0000] Authentication success for com.apple.mail
+[2026-07-07 08:07:31 +0000] Successfully relaunched com.apple.mail
+[2026-07-07 08:07:38 +0000] Allowing authenticated app to launch: net.whatsapp.WhatsApp
+[2026-07-07 08:08:28 +0000] Auth Similarity: 0.7746837 vs threshold: 0.55
