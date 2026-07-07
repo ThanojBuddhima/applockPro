@@ -21,6 +21,12 @@
 
 ---
 
+## 📄 Project Report
+
+For an in-depth look at the architecture, design decisions, and AI implementation details of AppLock Pro, please read the official [Project Report](https://github.com/ThanojBuddhima/applockPro/blob/main/docs/report.pdf).
+
+---
+
 ## 🎯 What is AppLock Pro?
 
 **AppLock Pro** is a native macOS desktop application that adds a privacy layer to your Mac. It allows you to lock specific apps (like Messages, Mail, WhatsApp, or Safari) and requires your face to unlock them.
