@@ -16,6 +16,10 @@ struct ContentView: View {
         }
         .animation(.easeInOut(duration: 0.3), value: appState.onboardingCompleted)
         .animation(.easeInOut(duration: 0.3), value: appState.isAppUnlocked)
+        .onDisappear {
+            // Lock the app when the window is closed
+            appState.isAppUnlocked = false
+        }
     }
 }
 

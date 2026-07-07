@@ -18,3 +18,5 @@
 [2026-07-07 07:46:07 +0000] Authentication success for com.apple.calculator
 [2026-07-07 07:46:07 +0000] Successfully relaunched com.apple.calculator
 [2026-07-07 07:46:08 +0000] Allowing authenticated app to launch: com.apple.calculator
+[2026-07-07 07:49:25 +0000] Starting AppMonitorService...
+[2026-07-07 07:49:38 +0000] Auth Similarity: 0.7683822 vs threshold: 0.55
