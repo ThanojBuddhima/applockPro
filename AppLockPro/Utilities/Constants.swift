@@ -4,7 +4,7 @@ import Foundation
 enum Constants {
     /// App metadata
     enum App {
-        static let name = "FaceLock Pro"
+        static let name = "AppLock Pro"
         static let bundleIdentifier = "com.applockpro.facelockpro"
         static let version = "1.0.0"
     }

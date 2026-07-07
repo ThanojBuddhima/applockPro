@@ -31,7 +31,7 @@ struct SidebarView: View {
             }
         }
         .listStyle(.sidebar)
-        .navigationTitle("FaceLock Pro")
+        .navigationTitle("AppLock Pro")
     }
 }
 

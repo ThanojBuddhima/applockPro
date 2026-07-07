@@ -89,7 +89,7 @@ struct AuthOverlayView: View {
             .frame(width: 120, height: 120)
             
             VStack(spacing: 8) {
-                Text("FaceLock Pro")
+                Text("AppLock Pro")
                     .font(.headline)
                     .foregroundStyle(.secondary)
                 

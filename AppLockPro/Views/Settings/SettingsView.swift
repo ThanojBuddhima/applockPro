@@ -93,7 +93,7 @@ struct GeneralSettingsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             settingsGroup(title: "Startup") {
-                Toggle("Launch FaceLock Pro at login", isOn: $launchAtStartup)
+                Toggle("Launch AppLock Pro at login", isOn: $launchAtStartup)
                     .onChange(of: launchAtStartup) { _, newValue in
                         do {
                             if newValue {

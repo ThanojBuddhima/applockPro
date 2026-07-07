@@ -17,21 +17,46 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func setupMenuBar() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem?.button {
-            button.image = NSImage(systemSymbolName: "lock.shield.fill", accessibilityDescription: "FaceLock Pro")
+            button.image = NSImage(systemSymbolName: "lock.shield.fill", accessibilityDescription: "AppLock Pro")
         }
         
         let menu = NSMenu()
-        menu.addItem(NSMenuItem(title: "Show FaceLock Pro", action: #selector(showMainWindow), keyEquivalent: "s"))
+        menu.addItem(NSMenuItem(title: "Dashboard", action: #selector(showMainWindow), keyEquivalent: "s"))
+        menu.addItem(NSMenuItem(title: "Settings", action: #selector(showSettings), keyEquivalent: ","))
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: "Quit AppLock Pro", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         
         statusItem?.menu = menu
     }
     
     @objc func showMainWindow() {
         NSApp.activate(ignoringOtherApps: true)
+        
+        let config = NSWorkspace.OpenConfiguration()
+        config.createsNewApplicationInstance = false
+        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: config)
+        
+        // Use NotificationCenter to tell the UI to change tabs if needed
+        NotificationCenter.default.post(name: Notification.Name("NavigateToDashboard"), object: nil)
+        
         for window in NSApp.windows {
-            // Find the main SwiftUI window and bring it to front
+            if window.className == "SwiftUI.AppKitWindow" {
+                window.makeKeyAndOrderFront(nil)
+                return
+            }
+        }
+    }
+    
+    @objc func showSettings() {
+        NSApp.activate(ignoringOtherApps: true)
+        
+        let config = NSWorkspace.OpenConfiguration()
+        config.createsNewApplicationInstance = false
+        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: config)
+        
+        NotificationCenter.default.post(name: Notification.Name("NavigateToSettings"), object: nil)
+        
+        for window in NSApp.windows {
             if window.className == "SwiftUI.AppKitWindow" {
                 window.makeKeyAndOrderFront(nil)
                 return
@@ -62,7 +87,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         if isEnrolled {
             print("[AppLockPro] Auth required to quit. Presenting system auth.")
-            SystemAuthService.shared.authenticate(reason: "Authenticate to quit FaceLock Pro") { success in
+            SystemAuthService.shared.authenticate(reason: "Authenticate to quit AppLock Pro") { success in
                 if success {
                     print("[AppLockPro] Quit authorized via System Auth.")
                     sender.reply(toApplicationShouldTerminate: true)

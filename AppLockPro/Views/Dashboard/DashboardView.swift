@@ -4,10 +4,9 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject var appState: AppState
 
-    // Placeholder stats for the UI skeleton
-    @State private var protectedAppsCount = 0
-    @State private var authSuccessToday = 0
-    @State private var authFailuresToday = 0
+    @ObservedObject var appManager = AppManager.shared
+    @ObservedObject var statsManager = StatsManager.shared
+    @ObservedObject var sessionManager = SessionManager.shared
 
     var body: some View {
         ScrollView {
@@ -60,27 +59,27 @@ struct DashboardView: View {
         HStack(spacing: 16) {
             StatCard(
                 title: "Protected Apps",
-                value: "\(protectedAppsCount)",
+                value: "\(appManager.protectedApps.count)",
                 icon: "lock.shield.fill",
                 color: .blue
             )
             StatCard(
                 title: "Unlocks Today",
-                value: "\(authSuccessToday)",
+                value: "\(statsManager.authSuccessToday)",
                 icon: "checkmark.circle.fill",
                 color: .green
             )
             StatCard(
                 title: "Failed Attempts",
-                value: "\(authFailuresToday)",
+                value: "\(statsManager.authFailuresToday)",
                 icon: "xmark.circle.fill",
-                color: authFailuresToday > 0 ? .red : .gray
+                color: statsManager.authFailuresToday > 0 ? .red : .gray
             )
             StatCard(
                 title: "Session Status",
-                value: "Active",
+                value: sessionManager.isSessionActive ? "Active" : "Inactive",
                 icon: "bolt.shield.fill",
-                color: .purple
+                color: sessionManager.isSessionActive ? .green : .gray
             )
         }
     }

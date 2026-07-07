@@ -1,7 +1,7 @@
 import Foundation
 import AppKit
 
-/// Represents an application that the user has chosen to protect with FaceLock Pro.
+/// Represents an application that the user has chosen to protect with AppLock Pro.
 struct ProtectedApp: Identifiable, Codable, Hashable {
     /// Unique identifier.
     let id: UUID

@@ -109,7 +109,7 @@ struct WelcomeView: View {
                 .foregroundStyle(.tint)
                 .symbolEffect(.pulse, options: .repeating)
 
-            Text("Welcome to FaceLock Pro")
+            Text("Welcome to AppLock Pro")
                 .font(.largeTitle.bold())
 
             Text("Protect your applications with AI-powered facial recognition.\nFast, secure, and completely offline.")
@@ -136,7 +136,7 @@ struct WelcomeView: View {
             Text("Permissions Required")
                 .font(.largeTitle.bold())
 
-            Text("FaceLock Pro needs the following permissions to protect your apps.")
+            Text("AppLock Pro needs the following permissions to protect your apps.")
                 .font(.title3)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -165,7 +165,7 @@ struct WelcomeView: View {
             .padding(.top, 10)
             
             if !accessibilityGranted {
-                Text("Clicking 'Grant Access' for Accessibility will open System Settings. Check the box for FaceLock Pro, then return here.")
+                Text("Clicking 'Grant Access' for Accessibility will open System Settings. Check the box for AppLock Pro, then return here.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -195,7 +195,7 @@ struct WelcomeView: View {
             Text("You're All Set!")
                 .font(.largeTitle.bold())
 
-            Text("FaceLock Pro is ready to protect your applications.\nYou can configure everything from the dashboard.")
+            Text("AppLock Pro is ready to protect your applications.\nYou can configure everything from the dashboard.")
                 .font(.title3)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

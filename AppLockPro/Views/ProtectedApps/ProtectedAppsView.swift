@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// View for managing which applications are protected by FaceLock Pro.
+/// View for managing which applications are protected by AppLock Pro.
 struct ProtectedAppsView: View {
     @State private var searchText = ""
     @State private var showingAppPicker = false
@@ -81,7 +81,7 @@ struct ProtectedAppsView: View {
             Text("No Protected Apps")
                 .font(.title2.bold())
 
-            Text("Add applications to protect them with FaceLock Pro.\nProtected apps will require authentication before opening.")
+            Text("Add applications to protect them with AppLock Pro.\nProtected apps will require authentication before opening.")
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
