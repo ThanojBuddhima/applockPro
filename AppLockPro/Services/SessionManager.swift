@@ -23,8 +23,14 @@ class SessionManager: ObservableObject {
     @AppStorage("lockAfterSleep") private var lockAfterSleep = true
     
     private var sessionTimeoutInterval: TimeInterval {
-        let timeout = AppSettings.SessionTimeout(rawValue: sessionTimeoutRaw) ?? .thirtyMinutes
-        return timeout.seconds ?? 1800 // Fallback to 30 mins for nil (untilLogout)
+        let timeout = AppSettings.SessionTimeout(rawValue: sessionTimeoutRaw) ?? .always
+        // For "Always Authenticate" (0 seconds), session is never active
+        // For "Until Logout" (nil seconds), use a very large value
+        if let seconds = timeout.seconds {
+            return seconds
+        } else {
+            return Double.greatestFiniteMagnitude // "Until Logout" — effectively infinite
+        }
     }
     
     private init() {
