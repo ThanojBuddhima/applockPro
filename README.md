@@ -53,12 +53,13 @@ Everything is processed entirely on your Mac. **No biometric data ever leaves yo
 ## 🚀 How to Install
 
 1. Download the latest `AppLockPro.dmg` from the **[Releases](https://github.com/ThanojBuddhima/applockPro/releases)** page.
-2. Double-click the downloaded `.dmg` file.
-3. Drag the **AppLock Pro** icon into your **Applications** folder.
-4. **Important First Launch:** Because this is an indie developer app, macOS will show a warning saying the app cannot be verified. To open it:
-   - **Right-click** (or Control-click) AppLock Pro in your Applications folder.
+2. **Important:** Because this is an indie developer app, macOS may show a warning that the file cannot be verified. To bypass this:
+   - **Right-click** (or Control-click) the downloaded `AppLockPro.dmg` file.
    - Select **Open** from the menu.
    - Click **Open** again on the security prompt.
+3. Drag the **AppLock Pro** icon into your **Applications** folder.
+4. **First Launch:** When opening the app for the first time, you may need to repeat the same step:
+   - **Right-click** AppLock Pro in your Applications folder and select **Open**.
 
 ---
 
