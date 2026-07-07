@@ -23,7 +23,7 @@ struct AboutView: View {
                             .padding()
                             .background(.tint.opacity(0.1), in: RoundedRectangle(cornerRadius: 20))
 
-                        Text("FaceLock Pro")
+                        Text("AppLock Pro")
                             .font(.title.bold())
 
                         Text("Version \(Constants.App.version)")

@@ -62,8 +62,8 @@ final class EnrollmentViewModel: ObservableObject {
                 stopCamera()
                 
                 // If we have a pixel buffer, generate the embedding
-                if let buffer = result.pixelBuffer {
-                    saveRealEmbedding(from: buffer)
+                if let _ = result.pixelBuffer {
+                    saveRealEmbedding(from: result)
                 } else {
                     currentInstruction = "Error: No pixel buffer available."
                 }
@@ -71,8 +71,9 @@ final class EnrollmentViewModel: ObservableObject {
         }
     }
     
-    private func saveRealEmbedding(from buffer: CVPixelBuffer) {
-        FaceRecognitionService.shared.generateEmbedding(from: buffer) { [weak self] embedding in
+    private func saveRealEmbedding(from result: FaceDetectionResult) {
+        guard let buffer = result.pixelBuffer else { return }
+        FaceRecognitionService.shared.generateEmbedding(from: buffer, faceRect: result.boundingBox) { [weak self] embedding in
             guard let self = self, let embedding = embedding else {
                 self?.currentInstruction = "Failed to extract face features."
                 return

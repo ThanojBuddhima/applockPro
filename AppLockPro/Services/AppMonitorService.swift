@@ -38,6 +38,12 @@ class AppMonitorService {
             return
         }
         
+        // If there's an active global session, bypass Face ID
+        if SessionManager.shared.isSessionActive {
+            print("Global session active. Allowing app to launch: \(bundleId)")
+            return
+        }
+        
         // Check if the app is protected
         if AppManager.shared.isAppProtected(bundleIdentifier: bundleId) {
             print("Protected app launched: \(bundleId). Terminating it...")

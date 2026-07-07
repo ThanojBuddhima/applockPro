@@ -15,7 +15,7 @@ struct SidebarView: View {
             }
 
             Section("Security") {
-                ForEach([NavigationItem.enrollment, .history]) { item in
+                ForEach([NavigationItem.enrollment]) { item in
                     NavigationLink(value: item) {
                         Label(item.rawValue, systemImage: item.icon)
                     }
@@ -31,7 +31,7 @@ struct SidebarView: View {
             }
         }
         .listStyle(.sidebar)
-        .navigationTitle("FaceLock Pro")
+        .navigationTitle("AppLock Pro")
     }
 }
 

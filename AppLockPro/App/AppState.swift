@@ -3,13 +3,13 @@ import SwiftUI
 /// Shared application state that flows through the entire view hierarchy.
 class AppState: ObservableObject {
     /// Whether the user has completed the initial face enrollment.
-    @Published var isEnrolled: Bool = false
+    @AppStorage("isEnrolled") var isEnrolled: Bool = false
 
     /// Whether all required permissions (camera, accessibility) have been granted.
-    @Published var permissionsGranted: Bool = false
+    @AppStorage("permissionsGranted") var permissionsGranted: Bool = false
 
     /// Whether the onboarding / welcome flow has been completed.
-    @Published var onboardingCompleted: Bool = false
+    @AppStorage("onboardingCompleted") var onboardingCompleted: Bool = false
 
     /// The currently selected sidebar navigation item.
     @Published var selectedNavItem: NavigationItem? = .dashboard
@@ -20,7 +20,6 @@ enum NavigationItem: String, CaseIterable, Identifiable {
     case dashboard = "Dashboard"
     case protectedApps = "Protected Apps"
     case enrollment = "Face Enrollment"
-    case history = "Activity History"
     case settings = "Settings"
     case about = "About"
 
@@ -31,7 +30,6 @@ enum NavigationItem: String, CaseIterable, Identifiable {
         case .dashboard:      return "gauge.with.dots.needle.33percent"
         case .protectedApps:  return "lock.shield"
         case .enrollment:     return "faceid"
-        case .history:        return "clock.arrow.circlepath"
         case .settings:       return "gearshape"
         case .about:          return "info.circle"
         }

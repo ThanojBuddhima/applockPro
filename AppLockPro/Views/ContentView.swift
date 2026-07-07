@@ -32,8 +32,6 @@ struct MainAppView: View {
                     ProtectedAppsView()
                 case .enrollment:
                     EnrollmentWizardView()
-                case .history:
-                    ActivityHistoryView()
                 case .settings:
                     SettingsView()
                 case .about:
@@ -45,6 +43,12 @@ struct MainAppView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 260)
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("NavigateToDashboard"))) { _ in
+            appState.selectedNavItem = .dashboard
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("NavigateToSettings"))) { _ in
+            appState.selectedNavItem = .settings
+        }
     }
 }
 

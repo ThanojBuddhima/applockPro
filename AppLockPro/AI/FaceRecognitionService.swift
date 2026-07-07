@@ -9,7 +9,10 @@ class FaceRecognitionService {
     static let shared = FaceRecognitionService()
     
     // Configurable threshold for matching faces (ArcFace usually uses around 0.5 - 0.6)
-    let similarityThreshold: Float = 0.55
+    var similarityThreshold: Float {
+        let stored = UserDefaults.standard.double(forKey: "confidenceThreshold")
+        return stored > 0 ? Float(stored) : 0.55
+    }
     
     private var visionModel: VNCoreMLModel?
     
@@ -25,7 +28,7 @@ class FaceRecognitionService {
     }
     
     /// Generates a 512-d embedding from a CVPixelBuffer using ArcFace.
-    func generateEmbedding(from pixelBuffer: CVPixelBuffer, completion: @escaping ([Float]?) -> Void) {
+    func generateEmbedding(from pixelBuffer: CVPixelBuffer, faceRect: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1), completion: @escaping ([Float]?) -> Void) {
         guard let visionModel = visionModel else {
             completion(nil)
             return
@@ -59,6 +62,7 @@ class FaceRecognitionService {
         // ArcFace expects the face to be cropped/scaled. Vision handles the scaling automatically.
         // We use .scaleFill or .centerCrop based on the model needs.
         request.imageCropAndScaleOption = .scaleFill
+        request.regionOfInterest = faceRect
         
         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
         

@@ -14,8 +14,8 @@ struct WelcomeView: View {
 
     enum OnboardingStep: Int, CaseIterable {
         case welcome
-        case permissions
         case enrollment
+        case permissions
         case complete
     }
 
@@ -41,10 +41,10 @@ struct WelcomeView: View {
                 switch currentStep {
                 case .welcome:
                     welcomeContent
-                case .permissions:
-                    permissionsContent
                 case .enrollment:
                     enrollmentContent
+                case .permissions:
+                    permissionsContent
                 case .complete:
                     completeContent
                 }
@@ -89,7 +89,10 @@ struct WelcomeView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
-                    .disabled(currentStep == .permissions && (!cameraGranted || !accessibilityGranted))
+                    .disabled(
+                        (currentStep == .permissions && (!cameraGranted || !accessibilityGranted)) ||
+                        (currentStep == .enrollment && !appState.isEnrolled)
+                    )
                 }
             }
             .padding(30)
@@ -106,7 +109,7 @@ struct WelcomeView: View {
                 .foregroundStyle(.tint)
                 .symbolEffect(.pulse, options: .repeating)
 
-            Text("Welcome to FaceLock Pro")
+            Text("Welcome to AppLock Pro")
                 .font(.largeTitle.bold())
 
             Text("Protect your applications with AI-powered facial recognition.\nFast, secure, and completely offline.")
@@ -133,7 +136,7 @@ struct WelcomeView: View {
             Text("Permissions Required")
                 .font(.largeTitle.bold())
 
-            Text("FaceLock Pro needs the following permissions to protect your apps.")
+            Text("AppLock Pro needs the following permissions to protect your apps.")
                 .font(.title3)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -162,7 +165,7 @@ struct WelcomeView: View {
             .padding(.top, 10)
             
             if !accessibilityGranted {
-                Text("Clicking 'Grant Access' for Accessibility will open System Settings. Check the box for FaceLock Pro, then return here.")
+                Text("Clicking 'Grant Access' for Accessibility will open System Settings. Check the box for AppLock Pro, then return here.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -180,28 +183,7 @@ struct WelcomeView: View {
     }
 
     private var enrollmentContent: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "person.crop.circle.badge.plus")
-                .font(.system(size: 80))
-                .foregroundStyle(.blue)
-
-            Text("Face Enrollment")
-                .font(.largeTitle.bold())
-
-            Text("You'll set up facial recognition in the next step.\nThis captures your face from multiple angles for accurate authentication.")
-                .font(.title3)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: 500)
-
-            VStack(alignment: .leading, spacing: 12) {
-                enrollmentStep(number: 1, text: "Position your face in the camera frame")
-                enrollmentStep(number: 2, text: "Follow on-screen prompts to look in different directions")
-                enrollmentStep(number: 3, text: "25 captures will be taken automatically")
-                enrollmentStep(number: 4, text: "Your face data is encrypted and stored locally")
-            }
-            .padding(.top, 10)
-        }
+        EnrollmentWizardView()
     }
 
     private var completeContent: some View {
@@ -213,7 +195,7 @@ struct WelcomeView: View {
             Text("You're All Set!")
                 .font(.largeTitle.bold())
 
-            Text("FaceLock Pro is ready to protect your applications.\nYou can configure everything from the dashboard.")
+            Text("AppLock Pro is ready to protect your applications.\nYou can configure everything from the dashboard.")
                 .font(.title3)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
