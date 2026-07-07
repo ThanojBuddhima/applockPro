@@ -101,11 +101,21 @@ class AuthOverlayViewModel: ObservableObject {
         authState = .failure
         statusMessage = message
         
-        // In a real app, we might allow retries.
-        // For now, delay and then fail, blocking the app.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+        // Delay slightly so the user sees the failure, then prompt fallback auth
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             self.stop()
-            self.onAuthResult?(false)
+            self.statusMessage = "Use Touch ID or Password..."
+            
+            SystemAuthService.shared.authenticate(reason: "Face ID failed. Please use Touch ID or your Mac password to unlock.") { [weak self] success in
+                if success {
+                    self?.handleSuccess()
+                } else {
+                    self?.statusMessage = "Authentication Failed."
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        self?.onAuthResult?(false)
+                    }
+                }
+            }
         }
     }
 }

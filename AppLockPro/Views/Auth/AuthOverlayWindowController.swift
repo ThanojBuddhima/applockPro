@@ -30,13 +30,20 @@ class AuthOverlayWindowController: NSWindowController {
     }
     
     func show(for appName: String, completion: @escaping (Bool) -> Void) {
+        // Cancel any active session before starting a new one
+        if let existingCompletion = self.completion {
+            existingCompletion(false)
+        }
+        
         self.completion = completion
         
         let overlayView = AuthOverlayView(appName: appName) { [weak self] success in
             self?.closeWindow(success: success)
         }
         
-        let hostingController = NSHostingController(rootView: overlayView)
+        // Use .id to force SwiftUI to completely recreate the view and its @StateObject 
+        // if the window is reused for a different appName.
+        let hostingController = NSHostingController(rootView: AnyView(overlayView.id(UUID())))
         window?.contentViewController = hostingController
         
         // Ensure we activate our app so the window shows up

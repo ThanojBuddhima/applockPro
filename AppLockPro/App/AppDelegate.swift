@@ -17,4 +17,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return false // Keep running in background / menu bar
     }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        let isEnrolled = UserDefaults.standard.bool(forKey: "isEnrolled")
+        
+        if isEnrolled {
+            print("[AppLockPro] Auth required to quit. Presenting system auth.")
+            SystemAuthService.shared.authenticate(reason: "Authenticate to quit FaceLock Pro") { success in
+                if success {
+                    print("[AppLockPro] Quit authorized via System Auth.")
+                    sender.reply(toApplicationShouldTerminate: true)
+                } else {
+                    print("[AppLockPro] Quit blocked via System Auth.")
+                    sender.reply(toApplicationShouldTerminate: false)
+                }
+            }
+            return .terminateLater
+        }
+        
+        print("[AppLockPro] Not enrolled, allowing immediate quit.")
+        return .terminateNow
+    }
 }
