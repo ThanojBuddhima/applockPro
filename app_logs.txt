@@ -1,22 +1,2 @@
-[2026-07-07 08:36:23 +0000] handleFailure called: Failed to read face features.
-[2026-07-07 08:36:38 +0000] Protected app activated: com.apple.calculator. Hiding it for auth... (timeout=5 Minutes)
-[2026-07-07 08:36:39 +0000] Already authenticating com.apple.calculator via activation, skipping launch handler.
-[2026-07-07 08:36:40 +0000] Auth Similarity: 0.6412801 vs threshold: 0.55
-[2026-07-07 08:36:40 +0000] Activation auth success for com.apple.calculator
-[2026-07-07 08:36:40 +0000] Session check for com.apple.calculator: elapsed=0s, timeout=300s, valid=true
-[2026-07-07 08:36:47 +0000] Session check for com.apple.calculator: elapsed=6s, timeout=300s, valid=true
-[2026-07-07 08:36:51 +0000] Session check for com.apple.calculator: elapsed=10s, timeout=300s, valid=true
-[2026-07-07 08:36:52 +0000] Protected app terminated: com.apple.calculator. Clearing auth.
-[2026-07-07 08:36:55 +0000] Session check for com.apple.mail: elapsed=295s, timeout=300s, valid=true
-[2026-07-07 08:37:04 +0000] Session check for com.apple.mail: elapsed=304s, timeout=300s, valid=false
-[2026-07-07 08:37:04 +0000] Protected app activated: com.apple.mail. Hiding it for auth... (timeout=5 Minutes)
-[2026-07-07 08:37:05 +0000] handleFailure called: Failed to read face features.
-[2026-07-07 08:37:10 +0000] Activation auth failure for com.apple.mail. Keeping hidden.
-[2026-07-07 08:37:11 +0000] Session check for com.apple.mail: elapsed=311s, timeout=300s, valid=false
-[2026-07-07 08:37:11 +0000] Protected app activated: com.apple.mail. Hiding it for auth... (timeout=5 Minutes)
-[2026-07-07 08:37:13 +0000] Auth Similarity: 0.7296542 vs threshold: 0.55
-[2026-07-07 08:37:14 +0000] Activation auth success for com.apple.mail
-[2026-07-07 08:37:14 +0000] Session check for com.apple.mail: elapsed=0s, timeout=300s, valid=true
-[2026-07-07 08:37:17 +0000] Session check for com.apple.mail: elapsed=3s, timeout=300s, valid=true
-[2026-07-07 08:37:21 +0000] Session check for com.apple.mail: elapsed=7s, timeout=300s, valid=true
-[2026-07-07 08:37:26 +0000] Session check for com.apple.mail: elapsed=12s, timeout=300s, valid=true
+[2026-07-07 08:46:40 +0000] Starting AppMonitorService...
+[2026-07-07 08:46:59 +0000] Auth Similarity: 0.78601897 vs threshold: 0.55

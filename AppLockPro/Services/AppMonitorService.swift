@@ -18,13 +18,6 @@ class AppMonitorService {
     /// Guard to prevent simultaneous auth windows
     private var currentlyAuthenticatingBundleId: String? = nil
     
-    /// Read session timeout setting — defaults to "Always Authenticate"
-    @AppStorage("sessionTimeout") private var sessionTimeoutRaw = AppSettings.SessionTimeout.always.rawValue
-    
-    private var sessionTimeout: AppSettings.SessionTimeout {
-        AppSettings.SessionTimeout(rawValue: sessionTimeoutRaw) ?? .always
-    }
-    
     private init() {}
     
     private func logToFile(_ message: String) {
@@ -44,33 +37,6 @@ class AppMonitorService {
         }
     }
     
-    // MARK: - Session Timeout Logic
-    
-    /// Checks whether a specific app still has a valid authentication based on the Session Timeout setting.
-    private func isAppAuthenticated(bundleId: String) -> Bool {
-        guard let lastAuthDate = appAuthTimestamps[bundleId] else {
-            return false
-        }
-        
-        switch sessionTimeout {
-        case .always:
-            // "Always Authenticate" — never consider previously authenticated
-            return false
-            
-        case .untilLogout:
-            // "Until Logout" — once authenticated, stays authenticated
-            return true
-            
-        default:
-            // Time-based — check if the timeout has elapsed
-            guard let timeoutSeconds = sessionTimeout.seconds, timeoutSeconds > 0 else { return false }
-            let elapsed = Date().timeIntervalSince(lastAuthDate)
-            let isValid = elapsed < timeoutSeconds
-            logToFile("Session check for \(bundleId): elapsed=\(Int(elapsed))s, timeout=\(Int(timeoutSeconds))s, valid=\(isValid)")
-            return isValid
-        }
-    }
-    
     /// Marks an app as authenticated right now.
     private func markAppAuthenticated(bundleId: String) {
         appAuthTimestamps[bundleId] = Date()
@@ -80,7 +46,7 @@ class AppMonitorService {
     // MARK: - Start Monitoring
     
     func startMonitoring() {
-        logToFile("Starting AppMonitorService... (sessionTimeout=\(sessionTimeout.rawValue))")
+        logToFile("Starting AppMonitorService...")
         
         // 1. Intercept fresh app launches
         NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didLaunchApplicationNotification)
@@ -133,11 +99,8 @@ class AppMonitorService {
         // If we're already showing an auth window for this app, don't fire again
         if currentlyAuthenticatingBundleId == bundleId { return }
         
-        // Check if the app still has a valid session based on the timeout setting
-        if isAppAuthenticated(bundleId: bundleId) { return }
-        
         if AppManager.shared.isAppProtected(bundleIdentifier: bundleId) {
-            logToFile("Protected app activated: \(bundleId). Requiring auth (timeout=\(sessionTimeout.rawValue))")
+            logToFile("Protected app activated: \(bundleId). Requiring auth.")
             
             let appName = app.localizedName ?? "App"
             
@@ -178,12 +141,6 @@ class AppMonitorService {
         // If we're already showing an auth window for this app (from activation), don't fire again
         if currentlyAuthenticatingBundleId == bundleId {
             logToFile("Already authenticating \(bundleId) via activation, skipping launch handler.")
-            return
-        }
-        
-        // Check if the app still has a valid session based on the timeout setting
-        if isAppAuthenticated(bundleId: bundleId) {
-            logToFile("App \(bundleId) still has valid session. Allowing launch.")
             return
         }
         
