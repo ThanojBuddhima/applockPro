@@ -18,6 +18,8 @@ class AuthOverlayViewModel: ObservableObject {
     
     private var cancellables = Set<AnyCancellable>()
     private var isVerifying = false
+    private var framesSinceStart = 0
+    private let warmupFrameCount = 10 // Skip first ~10 frames to let camera warm up
     
     var onAuthResult: ((Bool) -> Void)?
     
@@ -39,6 +41,7 @@ class AuthOverlayViewModel: ObservableObject {
     func start() {
         isVerifying = false
         sessionFailures = 0
+        framesSinceStart = 0
         authState = .scanning
         statusMessage = "Scanning face..."
         cameraService.start()
@@ -52,6 +55,13 @@ class AuthOverlayViewModel: ObservableObject {
     
     private func handleFaceResult(_ result: FaceDetectionResult?) {
         guard !isVerifying, authState == .scanning, let result = result else { return }
+        
+        // Camera warm-up: skip early frames that may produce blurry/overexposed images
+        framesSinceStart += 1
+        if framesSinceStart < warmupFrameCount {
+            statusMessage = "Initializing camera..."
+            return
+        }
         
         // Wait for a good quality face
         if result.quality > 0.4, let _ = result.pixelBuffer {
