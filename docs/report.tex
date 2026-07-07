@@ -210,18 +210,18 @@ When a protected application is detected:
 \begin{enumerate}[noitemsep]
     \item The bundle identifier is checked against the protected apps list.
     \item If the user has an active authenticated session for that app, access is granted immediately.
-    \item Otherwise, the protected application is hidden using \texttt{NSRunningApplication.hide()}.
+    \item Otherwise, the protected application is intercepted. The application's windows are hidden using \texttt{NSRunningApplication.hide()}, and a \texttt{SIGSTOP} UNIX signal is immediately sent to its Process ID (PID) via \texttt{kill(pid, SIGSTOP)}. This completely freezes the application in memory, preventing any background processing, network requests, or interactions.
     \item A floating authentication panel (\texttt{NSPanel} with \texttt{.floating} window level) is presented.
-    \item Upon successful authentication, the app is unhidden via \texttt{NSRunningApplication.unhide()}.
-    \item On repeated failures (exceeding max attempts), the app may be terminated via \texttt{NSRunningApplication.terminate()}.
+    \item Upon successful authentication, a \texttt{SIGCONT} signal is sent to the PID to unfreeze the process, and the app is unhidden via \texttt{NSRunningApplication.unhide()}.
+    \item If authentication fails, the application remains safely frozen and hidden. No unsaved user data is lost.
 \end{enumerate}
 
 \subsection{macOS API Constraints}
 \begin{itemize}[noitemsep]
-    \item The application must be \textbf{non-sandboxed} to call \texttt{hide()}, \texttt{unhide()}, and \texttt{terminate()} on other applications. Sandboxed apps are prohibited from controlling other processes.
+    \item The application utilizes POSIX signals to suspend and resume external processes, which provides true OS-level locking.
+    \item The application must be \textbf{non-sandboxed} to control other processes. Sandboxed apps are prohibited from modifying external process states.
     \item This means the application \textbf{cannot be distributed via the Mac App Store}.
     \item Distribution is via notarized DMG, direct download, or Homebrew cask.
-    \item A determined user could bypass hiding via Mission Control; this is documented as a known limitation.
 \end{itemize}
 
 \section{Face Enrollment Wizard}
@@ -366,7 +366,12 @@ The application never accesses, stores, or transmits fingerprint data. All biome
 \end{itemize}
 
 \section{Session Management}
-To avoid requiring authentication on every interaction, FaceLock Pro implements session management.
+To avoid requiring authentication on every interaction, FaceLock Pro implements robust session management.
+
+\subsection{Per-App Session Tracking}
+Sessions are tracked individually for each protected application bundle identifier using a timestamp dictionary (\texttt{[String: Date]}). This ensures that unlocking one application (e.g., Safari) does not inadvertently unlock another (e.g., Mail). 
+
+Additionally, the system implements a \textbf{3-second grace period} following a successful authentication. When an app is unlocked and programmatically brought to the foreground via \texttt{app.activate()}, macOS fires a subsequent \texttt{didActivate} notification. The grace period instructs the monitor to ignore activation events within 3 seconds of a successful authentication, completely eliminating infinite authentication loops without compromising security.
 
 \subsection{Session Timeout Options}
 \begin{table}[H]
@@ -614,9 +619,10 @@ The complete AI authentication pipeline executes the following stages sequential
 
 \begin{enumerate}
     \item \textbf{Camera Capture} — AVFoundation provides a \texttt{CMSampleBuffer} from the front camera at 30 FPS.
+    \item \textbf{Camera Warm-up Delay} — The pipeline explicitly drops the first 10 frames to allow the hardware sensor to auto-adjust exposure and white balance, preventing corrupted embeddings from underexposed frames.
     \item \textbf{Face Detection} — Vision Framework's \texttt{VNDetectFaceRectanglesRequest} locates faces in the frame.
     \item \textbf{Landmark Extraction} — \texttt{VNDetectFaceLandmarksRequest} identifies 76 facial landmarks.
-    \item \textbf{Quality Assessment} — \texttt{VNDetectFaceCaptureQualityRequest} scores the face quality (0.0--1.0).
+    \item \textbf{Quality Assessment} — \texttt{VNDetectFaceCaptureQualityRequest} scores the face quality. If the score is below 0.5, the user is prompted to improve lighting.
     \item \textbf{Face Alignment} — An affine transform normalizes the face using eye positions to a 112$\times$112 image.
     \item \textbf{Liveness Check} — Eye aspect ratio and head pose are analyzed across multiple frames.
     \item \textbf{Feature Extraction} — The aligned face is fed to ArcFace (Core ML), producing a 512-dim vector.
