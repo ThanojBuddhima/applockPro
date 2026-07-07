@@ -84,7 +84,7 @@ struct AppLockedView: View {
     }
     
     private func authenticate() {
-        SystemAuthService.shared.authenticate(reason: "Unlock AppLock Pro dashboard") { success in
+        AuthOverlayWindowController.shared.show(for: "AppLock Pro") { success in
             if success {
                 DispatchQueue.main.async {
                     appState.isAppUnlocked = true

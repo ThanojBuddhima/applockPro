@@ -7,3 +7,14 @@
 [2026-07-07 07:40:24 +0000] Authentication success for net.whatsapp.WhatsApp
 [2026-07-07 07:40:25 +0000] Successfully relaunched net.whatsapp.WhatsApp
 [2026-07-07 07:40:25 +0000] Allowing authenticated app to launch: net.whatsapp.WhatsApp
+[2026-07-07 07:45:36 +0000] Starting AppMonitorService...
+[2026-07-07 07:45:48 +0000] Protected app launched: com.apple.calculator. Terminating it...
+[2026-07-07 07:46:00 +0000] Auth Similarity: 0.6156255 vs threshold: 0.55
+[2026-07-07 07:46:00 +0000] Authentication success for com.apple.calculator
+[2026-07-07 07:46:01 +0000] Successfully relaunched com.apple.calculator
+[2026-07-07 07:46:01 +0000] Allowing authenticated app to launch: com.apple.calculator
+[2026-07-07 07:46:04 +0000] Protected app launched: com.apple.calculator. Terminating it...
+[2026-07-07 07:46:06 +0000] Auth Similarity: 0.6665462 vs threshold: 0.55
+[2026-07-07 07:46:07 +0000] Authentication success for com.apple.calculator
+[2026-07-07 07:46:07 +0000] Successfully relaunched com.apple.calculator
+[2026-07-07 07:46:08 +0000] Allowing authenticated app to launch: com.apple.calculator
