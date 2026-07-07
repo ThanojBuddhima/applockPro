@@ -52,6 +52,33 @@ class AppMonitorService {
                 }
             }
             .store(in: &cancellables)
+            
+        NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didActivateApplicationNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                self?.handleAppActivation(notification: notification)
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func handleAppActivation(notification: Notification) {
+        guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+              let bundleId = app.bundleIdentifier else { return }
+        
+        if bundleId == Bundle.main.bundleIdentifier { return }
+        if recentlyAuthenticatedApps.contains(bundleId) { return }
+        if SessionManager.shared.isSessionActive { return }
+        
+        if AppManager.shared.isAppProtected(bundleIdentifier: bundleId) {
+            logToFile("Protected app activated: \(bundleId). Hiding it for auth...")
+            
+            let appURL = app.bundleURL
+            let appName = app.localizedName ?? "App"
+            
+            app.hide()
+            
+            showAuthenticationOverlay(for: bundleId, appName: appName, appURL: appURL)
+        }
     }
     
     private func handleAppLaunch(notification: Notification) {

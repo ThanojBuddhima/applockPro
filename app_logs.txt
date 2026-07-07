@@ -62,3 +62,21 @@
 [2026-07-07 07:58:31 +0000] Successfully relaunched com.apple.calculator
 [2026-07-07 07:58:31 +0000] Allowing authenticated app to launch: com.apple.calculator
 [2026-07-07 07:58:48 +0000] Auth Similarity: 0.6881765 vs threshold: 0.55
+[2026-07-07 07:59:08 +0000] Starting AppMonitorService...
+[2026-07-07 07:59:20 +0000] Auth Similarity: 0.38602343 vs threshold: 0.55
+[2026-07-07 07:59:20 +0000] handleFailure called: Face not recognized (Score: 0.39)
+[2026-07-07 07:59:32 +0000] Protected app terminated: com.apple.calculator. Invalidating global session.
+[2026-07-07 07:59:34 +0000] Protected app launched: com.apple.calculator. Terminating it...
+[2026-07-07 07:59:34 +0000] Protected app terminated: com.apple.calculator. Invalidating global session.
+[2026-07-07 07:59:36 +0000] Auth Similarity: 0.6470515 vs threshold: 0.55
+[2026-07-07 07:59:36 +0000] Authentication success for com.apple.calculator
+[2026-07-07 07:59:37 +0000] Successfully relaunched com.apple.calculator
+[2026-07-07 07:59:37 +0000] Allowing authenticated app to launch: com.apple.calculator
+[2026-07-07 07:59:38 +0000] Protected app launched: com.apple.mail. Terminating it...
+[2026-07-07 07:59:38 +0000] Protected app terminated: com.apple.mail. Invalidating global session.
+[2026-07-07 07:59:38 +0000] Auth Similarity: 0.78591144 vs threshold: 0.55
+[2026-07-07 07:59:39 +0000] Authentication success for com.apple.mail
+[2026-07-07 07:59:39 +0000] Successfully relaunched com.apple.mail
+[2026-07-07 07:59:40 +0000] Allowing authenticated app to launch: com.apple.mail
+[2026-07-07 07:59:52 +0000] Protected app terminated: com.apple.calculator. Invalidating global session.
+[2026-07-07 08:02:53 +0000] Auth Similarity: 0.7775767 vs threshold: 0.55
