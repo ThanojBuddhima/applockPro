@@ -83,12 +83,30 @@ class AuthOverlayViewModel: ObservableObject {
             let similarity = FaceRecognitionService.shared.computeCosineSimilarity(embeddingA: enrolledEmbedding, embeddingB: currentEmbedding)
             
             NSLog("Auth Similarity: %f", similarity)
+            self.logToFile("Auth Similarity: \(similarity) vs threshold: \(FaceRecognitionService.shared.similarityThreshold)")
             
             if similarity >= FaceRecognitionService.shared.similarityThreshold {
                 self.handleSuccess()
             } else {
                 let formattedSim = String(format: "%.2f", similarity)
                 self.handleFailure(message: "Face not recognized (Score: \(formattedSim))")
+            }
+        }
+    }
+    
+    private func logToFile(_ message: String) {
+        print(message)
+        let logFileURL = URL(fileURLWithPath: "/Users/thanojbuddhima/Development/applockPro/app_logs.txt")
+        let logMessage = "[\(Date())] \(message)\n"
+        if let data = logMessage.data(using: .utf8) {
+            if FileManager.default.fileExists(atPath: logFileURL.path) {
+                if let fileHandle = try? FileHandle(forWritingTo: logFileURL) {
+                    fileHandle.seekToEndOfFile()
+                    fileHandle.write(data)
+                    fileHandle.closeFile()
+                }
+            } else {
+                try? data.write(to: logFileURL)
             }
         }
     }
@@ -108,6 +126,7 @@ class AuthOverlayViewModel: ObservableObject {
     }
     
     private func handleFailure(message: String) {
+        logToFile("handleFailure called: \(message)")
         StatsManager.shared.recordFailure()
         sessionFailures += 1
         

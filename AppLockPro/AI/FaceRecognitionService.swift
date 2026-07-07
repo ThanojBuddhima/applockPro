@@ -16,6 +16,23 @@ class FaceRecognitionService {
     
     private var visionModel: VNCoreMLModel?
     
+    private func logToFile(_ message: String) {
+        print(message)
+        let logFileURL = URL(fileURLWithPath: "/Users/thanojbuddhima/Development/applockPro/app_logs.txt")
+        let logMessage = "[\(Date())] \(message)\n"
+        if let data = logMessage.data(using: .utf8) {
+            if FileManager.default.fileExists(atPath: logFileURL.path) {
+                if let fileHandle = try? FileHandle(forWritingTo: logFileURL) {
+                    fileHandle.seekToEndOfFile()
+                    fileHandle.write(data)
+                    fileHandle.closeFile()
+                }
+            } else {
+                try? data.write(to: logFileURL)
+            }
+        }
+    }
+
     private init() {
         // Load the real ArcFace CoreML model
         do {
@@ -23,7 +40,7 @@ class FaceRecognitionService {
             let arcFace = try ArcFaceModel(configuration: config)
             self.visionModel = try VNCoreMLModel(for: arcFace.model)
         } catch {
-            print("Failed to load ArcFace model: \(error)")
+            logToFile("Failed to load ArcFace model: \(error)")
         }
     }
     
