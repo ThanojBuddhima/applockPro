@@ -144,20 +144,6 @@ struct SecuritySettingsSection: View {
                 Toggle("macOS Password", isOn: $macPassword)
             }
 
-            settingsGroup(title: "Auto Lock") {
-                Toggle("Lock after sleep", isOn: $lockAfterSleep)
-                HStack {
-                    Text("Session timeout")
-                    Spacer()
-                    Picker("", selection: sessionTimeout) {
-                        ForEach(AppSettings.SessionTimeout.allCases) { timeout in
-                            Text(timeout.rawValue).tag(timeout)
-                        }
-                    }
-                    .frame(width: 200)
-                }
-            }
-
             settingsGroup(title: "Failed Attempts") {
                 Stepper("Maximum attempts: \(maxAttempts)", value: $maxAttempts, in: 3...10)
             }

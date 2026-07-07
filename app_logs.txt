@@ -291,3 +291,92 @@
 [2026-07-07 08:23:21 +0000] Auth Similarity: -0.01859206 vs threshold: 0.55
 [2026-07-07 08:23:21 +0000] handleFailure called: Face not recognized (Score: -0.02)
 [2026-07-07 08:23:26 +0000] Activation auth failure for net.whatsapp.WhatsApp. Keeping hidden.
+[2026-07-07 08:24:24 +0000] Protected app activated: net.whatsapp.WhatsApp. Hiding it for auth...
+[2026-07-07 08:24:25 +0000] Protected app deactivated: net.whatsapp.WhatsApp. Clearing per-app auth.
+[2026-07-07 08:24:26 +0000] Auth Similarity: 0.81403625 vs threshold: 0.55
+[2026-07-07 08:24:27 +0000] Activation auth success for net.whatsapp.WhatsApp
+[2026-07-07 08:24:31 +0000] Protected app terminated: com.apple.calculator. Clearing per-app auth.
+[2026-07-07 08:24:32 +0000] Protected app activated: com.apple.calculator. Hiding it for auth...
+[2026-07-07 08:24:32 +0000] Protected app deactivated: net.whatsapp.WhatsApp. Clearing per-app auth.
+[2026-07-07 08:24:32 +0000] Protected app deactivated: com.apple.calculator. Clearing per-app auth.
+[2026-07-07 08:24:33 +0000] Already authenticating com.apple.calculator via activation, skipping launch handler.
+[2026-07-07 08:24:34 +0000] Auth Similarity: 0.8781599 vs threshold: 0.55
+[2026-07-07 08:24:35 +0000] Activation auth success for com.apple.calculator
+[2026-07-07 08:24:37 +0000] Protected app deactivated: com.apple.calculator. Clearing per-app auth.
+[2026-07-07 08:24:37 +0000] Protected app terminated: com.apple.calculator. Clearing per-app auth.
+[2026-07-07 08:24:38 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:24:38 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:24:39 +0000] Auth Similarity: 0.84848523 vs threshold: 0.55
+[2026-07-07 08:24:40 +0000] Activation auth success for com.apple.mail
+[2026-07-07 08:24:44 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:24:46 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:24:46 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:24:48 +0000] Auth Similarity: 0.86480606 vs threshold: 0.55
+[2026-07-07 08:24:48 +0000] Activation auth success for com.apple.mail
+[2026-07-07 08:24:51 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:24:52 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:24:52 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:24:54 +0000] Auth Similarity: 0.8529676 vs threshold: 0.55
+[2026-07-07 08:24:55 +0000] Activation auth success for com.apple.mail
+[2026-07-07 08:25:02 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:25:03 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:25:03 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:25:05 +0000] Auth Similarity: 0.8616845 vs threshold: 0.55
+[2026-07-07 08:25:05 +0000] Activation auth success for com.apple.mail
+[2026-07-07 08:25:13 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:25:15 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:25:15 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:25:24 +0000] Auth Similarity: 0.11882304 vs threshold: 0.55
+[2026-07-07 08:25:24 +0000] handleFailure called: Face not recognized (Score: 0.12)
+[2026-07-07 08:25:29 +0000] Activation auth success for com.apple.mail
+[2026-07-07 08:25:34 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:25:37 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:25:37 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:25:39 +0000] Auth Similarity: 0.7547442 vs threshold: 0.55
+[2026-07-07 08:25:40 +0000] Activation auth success for com.apple.mail
+[2026-07-07 08:25:46 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:25:48 +0000] Auth Similarity: 0.69987345 vs threshold: 0.55
+[2026-07-07 08:25:55 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:25:55 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:25:56 +0000] Auth Similarity: 0.69562066 vs threshold: 0.55
+[2026-07-07 08:25:57 +0000] Activation auth success for com.apple.mail
+[2026-07-07 08:25:57 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:25:59 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:25:59 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:26:00 +0000] Auth Similarity: 0.7200172 vs threshold: 0.55
+[2026-07-07 08:26:01 +0000] Activation auth success for com.apple.mail
+[2026-07-07 08:26:04 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:26:05 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:26:05 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:26:06 +0000] Auth Similarity: 0.7114985 vs threshold: 0.55
+[2026-07-07 08:26:06 +0000] Activation auth success for com.apple.mail
+[2026-07-07 08:26:11 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:26:12 +0000] Auth Similarity: 0.62106115 vs threshold: 0.55
+[2026-07-07 08:29:55 +0000] Auth Similarity: 0.8032379 vs threshold: 0.55
+[2026-07-07 08:30:06 +0000] Protected app activated: com.apple.mail. Hiding it for auth...
+[2026-07-07 08:30:06 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:30:07 +0000] Auth Similarity: 0.8467749 vs threshold: 0.55
+[2026-07-07 08:30:08 +0000] Activation auth success for com.apple.mail
+[2026-07-07 08:30:09 +0000] Protected app activated: net.whatsapp.WhatsApp. Hiding it for auth...
+[2026-07-07 08:30:09 +0000] Protected app deactivated: com.apple.mail. Clearing per-app auth.
+[2026-07-07 08:30:09 +0000] Protected app deactivated: net.whatsapp.WhatsApp. Clearing per-app auth.
+[2026-07-07 08:30:10 +0000] Auth Similarity: 0.8587542 vs threshold: 0.55
+[2026-07-07 08:30:10 +0000] Activation auth success for net.whatsapp.WhatsApp
+[2026-07-07 08:30:20 +0000] Protected app deactivated: net.whatsapp.WhatsApp. Clearing per-app auth.
+[2026-07-07 08:30:23 +0000] Protected app activated: net.whatsapp.WhatsApp. Hiding it for auth...
+[2026-07-07 08:30:23 +0000] Protected app deactivated: net.whatsapp.WhatsApp. Clearing per-app auth.
+[2026-07-07 08:30:24 +0000] Already authenticating net.whatsapp.WhatsApp via activation, skipping launch handler.
+[2026-07-07 08:30:25 +0000] Auth Similarity: 0.8763356 vs threshold: 0.55
+[2026-07-07 08:30:25 +0000] Activation auth success for net.whatsapp.WhatsApp
+[2026-07-07 08:30:29 +0000] Protected app deactivated: net.whatsapp.WhatsApp. Clearing per-app auth.
+[2026-07-07 08:30:31 +0000] Protected app activated: net.whatsapp.WhatsApp. Hiding it for auth...
+[2026-07-07 08:30:31 +0000] Protected app deactivated: net.whatsapp.WhatsApp. Clearing per-app auth.
+[2026-07-07 08:30:33 +0000] Auth Similarity: -0.049082413 vs threshold: 0.55
+[2026-07-07 08:30:33 +0000] handleFailure called: Face not recognized (Score: -0.05)
+[2026-07-07 08:30:38 +0000] Activation auth failure for net.whatsapp.WhatsApp. Keeping hidden.
+[2026-07-07 08:30:42 +0000] Protected app deactivated: net.whatsapp.WhatsApp. Clearing per-app auth.
+[2026-07-07 08:30:43 +0000] Protected app activated: net.whatsapp.WhatsApp. Hiding it for auth...
+[2026-07-07 08:30:43 +0000] Protected app deactivated: net.whatsapp.WhatsApp. Clearing per-app auth.
+[2026-07-07 08:30:45 +0000] Auth Similarity: 0.8126127 vs threshold: 0.55
+[2026-07-07 08:30:45 +0000] Activation auth success for net.whatsapp.WhatsApp
+[2026-07-07 08:30:48 +0000] Protected app deactivated: net.whatsapp.WhatsApp. Clearing per-app auth.
