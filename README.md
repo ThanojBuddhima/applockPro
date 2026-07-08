@@ -23,7 +23,9 @@
 
 ## 📄 Project Report
 
-For an in-depth look at the architecture, design decisions, and AI implementation details of AppLock Pro, please read the official [Project Report](https://github.com/ThanojBuddhima/applockPro/blob/main/docs/report.pdf).
+For an in-depth look at the architecture, design decisions, and AI implementation details of AppLock Pro, please read the official Project Report
+
+[appLockPro.pdf](https://github.com/user-attachments/files/29790516/appLockPro.pdf)
 
 ---
 
