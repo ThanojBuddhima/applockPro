@@ -77,6 +77,11 @@ Then, simply drag **AppLock Pro** into your Applications folder. Since you downl
 3. **Lock Apps:** Go to the **Protected Apps** tab in the sidebar and click the `+` button to add apps like Mail, Messages, or WhatsApp.
 4. **Test it out:** Close the AppLock Pro window (it stays running in your menu bar). Try to open one of your protected apps. You'll be greeted with a Face ID scanner!
 
+
+
+https://github.com/user-attachments/assets/59778891-efd7-4c33-af2b-02062b1337fa
+
+
 ---
 
 ## ⚙️ Settings & Configuration
