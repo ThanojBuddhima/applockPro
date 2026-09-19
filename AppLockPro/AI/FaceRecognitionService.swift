@@ -34,11 +34,15 @@ class FaceRecognitionService {
     }
 
     private init() {
-        // Load the real ArcFace CoreML model
+        // Load the compiled ArcFace CoreML model from the app bundle
         do {
             let config = MLModelConfiguration()
-            let arcFace = try ArcFaceModel(configuration: config)
-            self.visionModel = try VNCoreMLModel(for: arcFace.model)
+            guard let url = Bundle.main.url(forResource: "ArcFaceModel", withExtension: "mlmodelc") else {
+                logToFile("Failed to load ArcFace model: ArcFaceModel.mlmodelc not found in bundle")
+                return
+            }
+            let model = try MLModel(contentsOf: url, configuration: config)
+            self.visionModel = try VNCoreMLModel(for: model)
         } catch {
             logToFile("Failed to load ArcFace model: \(error)")
         }

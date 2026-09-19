@@ -2,7 +2,6 @@ import AppKit
 
 /// Measures the hardware notch (or a top-center fallback) and the expanded island window frame.
 struct NotchGeometry {
-    static let expandedSize = NSSize(width: 340, height: 120)
     static let fallbackCollapsedSize = NSSize(width: 180, height: 32)
     static let fallbackTopInset: CGFloat = 12
 
@@ -44,8 +43,8 @@ struct NotchGeometry {
             ? NSSize(width: notchWidth, height: notchHeight)
             : Self.fallbackCollapsedSize
 
-        let expandedWidth = max(Self.expandedSize.width, self.collapsedSize.width + 24)
-        let expandedHeight = Self.expandedSize.height
+        let expandedWidth = self.collapsedSize.width + 28
+        let expandedHeight = max(132, self.collapsedSize.height * 4)
         self.expandedSize = NSSize(width: expandedWidth, height: expandedHeight)
 
         let x = frame.midX - expandedWidth / 2
@@ -53,7 +52,6 @@ struct NotchGeometry {
         if detectedNotch {
             y = frame.maxY - expandedHeight
         } else {
-            // Sit just below the menu bar on non-notch displays.
             y = screen.visibleFrame.maxY - Self.fallbackTopInset - expandedHeight
         }
         self.windowFrame = NSRect(x: x, y: y, width: expandedWidth, height: expandedHeight)

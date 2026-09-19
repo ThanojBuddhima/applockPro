@@ -27,6 +27,10 @@ targets:
         excludes:
           - "**/.DS_Store"
           - "**/*.tar.gz"
+          - "AI/Models/**"
+      - path: AppLockPro/AI/Models/ArcFaceModel.mlmodelc
+        type: folder
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.applockpro.facelockpro

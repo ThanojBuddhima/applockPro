@@ -5,6 +5,7 @@ class AppSettings: ObservableObject {
     // MARK: - General
     @Published var launchAtStartup: Bool = false
     @Published var startMinimized: Bool = false
+    @Published var unlockAnimationEnabled: Bool = true
 
     // MARK: - Security
     @Published var faceUnlockEnabled: Bool = true

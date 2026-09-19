@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Compact Dynamic Island–style unlock UI that expands from the Mac notch.
+/// Notch unlock overlay: black housing hanging from the camera notch with a Face ID glyph.
 struct AuthNotchView: View {
     let appName: String
+    let animationEnabled: Bool
     let collapsedSize: CGSize
     let expandedSize: CGSize
     let onComplete: (Bool) -> Void
@@ -10,6 +11,7 @@ struct AuthNotchView: View {
     @StateObject private var viewModel = AuthOverlayViewModel()
     @State private var isExpanded = false
     @State private var shakeOffset: CGFloat = 0
+    @State private var isPulsing = false
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -19,12 +21,20 @@ struct AuthNotchView: View {
                 .offset(x: shakeOffset)
         }
         .frame(width: expandedSize.width, height: expandedSize.height, alignment: .top)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(appName) is locked")
+        .accessibilityValue(viewModel.statusMessage)
         .onAppear {
             viewModel.onAuthResult = onComplete
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
+            if animationEnabled {
+                withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) {
+                    isExpanded = true
+                }
+            } else {
                 isExpanded = true
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            isPulsing = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + (animationEnabled ? 0.12 : 0)) {
                 viewModel.start()
             }
         }
@@ -34,15 +44,18 @@ struct AuthNotchView: View {
         .onChange(of: viewModel.authState) { _, newState in
             switch newState {
             case .success:
+                isPulsing = false
+                guard animationEnabled else { return }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
                         isExpanded = false
                     }
                 }
             case .failure:
+                isPulsing = false
                 performShake()
             default:
-                break
+                isPulsing = true
             }
         }
     }
@@ -56,73 +69,44 @@ struct AuthNotchView: View {
     }
 
     private var island: some View {
-        HStack(spacing: 12) {
+        ZStack {
             if isExpanded {
-                Image(systemName: iconName)
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundStyle(iconColor)
-                    .symbolEffect(
-                        .pulse,
-                        options: .repeating,
-                        isActive: viewModel.authState == .scanning || viewModel.authState == .verifying
+                FaceIDGlyph(color: glyphColor)
+                    .frame(width: 64, height: 64)
+                    .scaleEffect(isPulsing ? 1.08 : 1.0)
+                    .animation(
+                        isPulsing
+                            ? .easeInOut(duration: 0.9).repeatForever(autoreverses: true)
+                            : .easeOut(duration: 0.2),
+                        value: isPulsing
                     )
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("\(appName) is locked")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
-
-                    Text(viewModel.statusMessage)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(statusColor)
-                        .lineLimit(1)
-                }
-                .transition(.opacity.combined(with: .move(edge: .trailing)))
-
-                Spacer(minLength: 0)
+                    .transition(.opacity)
             }
         }
-        .padding(.horizontal, isExpanded ? 18 : 0)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .background(Color.black)
-        .clipShape(Capsule())
-        .overlay {
-            Capsule()
-                .strokeBorder(Color.white.opacity(isExpanded ? 0.12 : 0), lineWidth: 1)
-        }
+        .clipShape(islandShape)
     }
 
-    private var iconName: String {
-        switch viewModel.authState {
-        case .success:
-            return "faceid"
-        case .failure:
-            return "xmark.circle.fill"
-        default:
-            return "faceid"
-        }
+    private var islandShape: UnevenRoundedRectangle {
+        let collapsedBottom = collapsedSize.height / 2
+        return UnevenRoundedRectangle(
+            topLeadingRadius: 0,
+            bottomLeadingRadius: isExpanded ? 36 : collapsedBottom,
+            bottomTrailingRadius: isExpanded ? 36 : collapsedBottom,
+            topTrailingRadius: 0,
+            style: .continuous
+        )
     }
 
-    private var iconColor: Color {
+    private var glyphColor: Color {
         switch viewModel.authState {
         case .success:
             return .green
         case .failure:
             return .red
         default:
-            return .white
-        }
-    }
-
-    private var statusColor: Color {
-        switch viewModel.authState {
-        case .success:
-            return .green.opacity(0.9)
-        case .failure:
-            return .red.opacity(0.95)
-        default:
-            return .white.opacity(0.65)
+            return UnlockPalette.scanCyan
         }
     }
 
@@ -142,10 +126,11 @@ struct AuthNotchView: View {
 #Preview {
     AuthNotchView(
         appName: "Safari",
+        animationEnabled: true,
         collapsedSize: CGSize(width: 185, height: 32),
-        expandedSize: CGSize(width: 340, height: 120),
+        expandedSize: CGSize(width: 213, height: 132),
         onComplete: { _ in }
     )
-    .frame(width: 400, height: 200)
+    .frame(width: 240, height: 160)
     .background(Color.gray)
 }

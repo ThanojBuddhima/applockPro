@@ -60,5 +60,6 @@ enum Constants {
         static let faceUnlockEnabled = "faceUnlockEnabled"
         static let touchIDEnabled = "touchIDEnabled"
         static let pinEnabled = "pinEnabled"
+        static let unlockAnimationEnabled = "unlockAnimationEnabled"
     }
 }

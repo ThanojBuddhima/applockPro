@@ -50,19 +50,20 @@ class AuthOverlayWindowController: NSWindowController {
 
         self.completion = completion
 
+        let animationEnabled = UserDefaults.standard.object(forKey: Constants.Defaults.unlockAnimationEnabled) as? Bool ?? true
         let geometry = NotchGeometry.current()
+
         let overlayView = AuthNotchView(
             appName: appName,
+            animationEnabled: animationEnabled,
             collapsedSize: CGSize(width: geometry.collapsedSize.width, height: geometry.collapsedSize.height),
             expandedSize: CGSize(width: geometry.expandedSize.width, height: geometry.expandedSize.height)
         ) { [weak self] success in
             self?.closeWindow(success: success)
         }
 
-        // Force SwiftUI to recreate the view and its @StateObject when reused.
         let hostingController = NSHostingController(rootView: AnyView(overlayView.id(UUID())))
         hostingController.sizingOptions = []
-        hostingController.view.isOpaque = false
         hostingController.view.wantsLayer = true
         hostingController.view.layer?.backgroundColor = NSColor.clear.cgColor
 

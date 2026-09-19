@@ -44,4 +44,10 @@ playground.xcworkspace
 # XcodeGen
 AppLockPro.xcodeproj/
 AppLockPro/AI/Models/*.mlpackage
+AppLockPro/AI/Models/*.mlmodelc
 AppLockPro/AI/Models/*.tar.gz
+
+# Local build artifacts
+output/
+*.dmg
+app_logs.txt

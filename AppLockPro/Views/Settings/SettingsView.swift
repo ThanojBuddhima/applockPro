@@ -88,6 +88,7 @@ import ServiceManagement
 struct GeneralSettingsSection: View {
     @AppStorage("launchAtLogin") private var launchAtStartup = false
     @AppStorage("hideDockIcon") private var hideDockIcon = false
+    @AppStorage(Constants.Defaults.unlockAnimationEnabled) private var unlockAnimationEnabled = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -113,6 +114,13 @@ struct GeneralSettingsSection: View {
                             NSApp.activate(ignoringOtherApps: true)
                         }
                     }
+            }
+
+            settingsGroup(title: "Animation") {
+                Toggle("Show animation", isOn: $unlockAnimationEnabled)
+                Text("The animation that appears when unlocking")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
     }
