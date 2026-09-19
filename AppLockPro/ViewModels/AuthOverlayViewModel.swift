@@ -11,7 +11,7 @@ enum AuthState {
 
 class AuthOverlayViewModel: ObservableObject {
     @Published var authState: AuthState = .scanning
-    @Published var statusMessage: String = "Scanning face..."
+    @Published var statusMessage: String = "Looking for you…"
     
     let cameraService = CameraService()
     let faceDetector = FaceDetectorService()
@@ -43,7 +43,7 @@ class AuthOverlayViewModel: ObservableObject {
         sessionFailures = 0
         framesSinceStart = 0
         authState = .scanning
-        statusMessage = "Scanning face..."
+        statusMessage = "Looking for you…"
         cameraService.start()
         faceDetector.startProcessing(framePublisher: cameraService.framePublisher)
     }
@@ -59,7 +59,7 @@ class AuthOverlayViewModel: ObservableObject {
         // Camera warm-up: skip early frames that may produce blurry/overexposed images
         framesSinceStart += 1
         if framesSinceStart < warmupFrameCount {
-            statusMessage = "Initializing camera..."
+            statusMessage = "Looking for you…"
             return
         }
         
@@ -80,13 +80,13 @@ class AuthOverlayViewModel: ObservableObject {
         guard let buffer = result.pixelBuffer else { return }
         FaceRecognitionService.shared.generateEmbedding(from: buffer, faceRect: result.boundingBox) { [weak self] currentEmbedding in
             guard let self = self, let currentEmbedding = currentEmbedding else {
-                self?.handleFailure(message: "Failed to read face features.")
+                self?.handleFailure(message: "Can't read face")
                 return
             }
             
             // Get enrolled embedding
             guard let enrolledEmbedding = KeychainManager.shared.getEmbedding() else {
-                self.handleFailure(message: "No enrolled face found. Please enroll first.")
+                self.handleFailure(message: "No enrolled face")
                 return
             }
             
@@ -98,8 +98,7 @@ class AuthOverlayViewModel: ObservableObject {
             if similarity >= FaceRecognitionService.shared.similarityThreshold {
                 self.handleSuccess()
             } else {
-                let formattedSim = String(format: "%.2f", similarity)
-                self.handleFailure(message: "Face not recognized (Score: \(formattedSim))")
+                self.handleFailure(message: "Not recognized")
             }
         }
     }
@@ -126,11 +125,11 @@ class AuthOverlayViewModel: ObservableObject {
         SessionManager.shared.activateSession()
         
         authState = .success
-        statusMessage = "Match found!"
-        
-        // Delay slightly so the user sees the success state before closing
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.stop()
+        statusMessage = "Unlocked"
+        stop()
+
+        // Delay so the island can collapse back into the notch before dismissing.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
             self.onAuthResult?(true)
         }
     }
@@ -148,13 +147,13 @@ class AuthOverlayViewModel: ObservableObject {
             self.stop()
             
             if self.sessionFailures >= self.maxAttempts {
-                self.statusMessage = "Max attempts reached. Use Password."
+                self.statusMessage = "Use password"
                 // Force system auth immediately
                 SystemAuthService.shared.authenticate(reason: "Face ID failed too many times. Please use Touch ID or your Mac password to unlock.") { [weak self] success in
                     if success {
                         self?.handleSuccess()
                     } else {
-                        self?.statusMessage = "Authentication Failed."
+                        self?.statusMessage = "Failed"
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                             self?.onAuthResult?(false)
                         }
@@ -163,13 +162,13 @@ class AuthOverlayViewModel: ObservableObject {
                 return
             }
             
-            self.statusMessage = "Use Touch ID or Password..."
+            self.statusMessage = "Use Touch ID"
             
             SystemAuthService.shared.authenticate(reason: "Face ID failed. Please use Touch ID or your Mac password to unlock.") { [weak self] success in
                 if success {
                     self?.handleSuccess()
                 } else {
-                    self?.statusMessage = "Authentication Failed."
+                    self?.statusMessage = "Failed"
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                         self?.onAuthResult?(false)
                     }
